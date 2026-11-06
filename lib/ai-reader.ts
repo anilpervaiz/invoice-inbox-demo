@@ -75,12 +75,13 @@ export async function readWithAi(data: Uint8Array, options?: ReadWithAiOptions):
       ],
     });
     return { reader: "ai", status: "ok", fields: output };
-  } catch (error: any) {
+  } catch (error: unknown) {
     const sanitized = sanitizeLogMessage(error);
     console.error("[ai-reader] AI read failed:", sanitized);
 
-    const errorName = String(error?.name ?? "");
-    const errorMsg = String(error?.message ?? "").toLowerCase();
+    const err = error as { name?: string; message?: string } | null;
+    const errorName = String(err?.name ?? "");
+    const errorMsg = String(err?.message ?? "").toLowerCase();
     const isTimeout =
       errorName === "AbortError" ||
       errorName === "TimeoutError" ||

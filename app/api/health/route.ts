@@ -23,7 +23,7 @@ export async function GET(request: Request) {
   const serverHealthToken = process.env.HEALTH_TOKEN?.trim() || null;
   const isFullCheckRequested = Boolean(token);
 
-  if (isFullCheckRequested) {
+  if (token) {
     if (!serverHealthToken || !safeCompare(token, serverHealthToken)) {
       return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
     }

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
-import { checkDates, runChecks } from "./rules";
+import { checkDates } from "./rules";
 import { RULE_CONTEXT, SUPPLIERS, uploadRuleContext } from "./demo-data";
 import type { InvoiceFields } from "./types";
 
@@ -63,7 +63,7 @@ describe("Stage 1 - Task 2: health check spending protection", () => {
 
     const samplePdf = readFileSync("public/samples/clean-local.pdf");
     vi.spyOn(globalThis, "fetch").mockImplementation(
-      () => Promise.resolve(new Response(samplePdf, { status: 200, headers: { "Content-Type": "application/pdf" } })) as any,
+      () => Promise.resolve(new Response(samplePdf, { status: 200, headers: { "Content-Type": "application/pdf" } })) as unknown as Promise<Response>,
     );
 
     const { GET } = await import("../app/api/health/route");
@@ -115,7 +115,7 @@ describe("Stage 1 - Task 2: health check spending protection", () => {
 
     const samplePdf = readFileSync("public/samples/clean-local.pdf");
     vi.spyOn(globalThis, "fetch").mockImplementation(
-      () => Promise.resolve(new Response(samplePdf, { status: 200, headers: { "Content-Type": "application/pdf" } })) as any,
+      () => Promise.resolve(new Response(samplePdf, { status: 200, headers: { "Content-Type": "application/pdf" } })) as unknown as Promise<Response>,
     );
 
     const { GET } = await import("../app/api/health/route");
@@ -145,7 +145,9 @@ describe("Stage 1 - Task 3: upload safety checks", () => {
     const fakePdfBytes = new TextEncoder().encode("Not a real pdf content");
     const result = await inspectPdfUpload(fakePdfBytes);
     expect(result.ok).toBe(false);
-    expect(result.error).toContain("Only PDF files work here");
+    if (!result.ok) {
+      expect(result.error).toContain("Only PDF files work here");
+    }
   });
 
   it("inspectPdfUpload refuses password-protected PDFs with a clear message", async () => {
@@ -164,7 +166,9 @@ describe("Stage 1 - Task 3: upload safety checks", () => {
 
     const result = await inspectPdfUpload(lockedBytes);
     expect(result.ok).toBe(false);
-    expect(result.error).toContain("password-protected");
+    if (!result.ok) {
+      expect(result.error).toContain("password-protected");
+    }
   });
 
   it("inspectPdfUpload enforces the 5-page limit", async () => {
@@ -192,7 +196,9 @@ describe("Stage 1 - Task 3: upload safety checks", () => {
     const sixPageBytes = await makePdf(6);
     const sixResult = await inspectPdfUpload(sixPageBytes, 5);
     expect(sixResult.ok).toBe(false);
-    expect(sixResult.error).toContain("5 pages or fewer");
+    if (!sixResult.ok) {
+      expect(sixResult.error).toContain("5 pages or fewer");
+    }
   });
 
   it("POST /api/extract rejects non-PDF and password-protected files with 400", async () => {
@@ -338,14 +344,14 @@ describe("Stage 1 - Task 6: error text sanitization", () => {
     process.env.GOOGLE_GENERATIVE_AI_API_KEY = "test-key";
     const { readWithAi } = await import("./ai-reader");
 
-    const failingModel: any = {
+    const failingModel = {
       specificationVersion: "v1",
       provider: "mock",
       modelId: "mock-fail",
       doGenerate: () => {
         throw new Error("AI_APICallError: 400 Bad Request to https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSySecretKey12345");
       },
-    };
+    } as unknown as NonNullable<Parameters<typeof readWithAi>[1]>["model"];
 
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 

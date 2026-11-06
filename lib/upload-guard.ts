@@ -32,9 +32,10 @@ export async function inspectPdfUpload(data: Uint8Array, maxPages = MAX_PDF_PAGE
   let pdf: Awaited<ReturnType<typeof getDocumentProxy>> | undefined;
   try {
     pdf = await getDocumentProxy(new Uint8Array(data));
-  } catch (error: any) {
-    const msg = String(error?.message ?? "").toLowerCase();
-    const name = String(error?.name ?? "");
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string } | null;
+    const msg = String(err?.message ?? "").toLowerCase();
+    const name = String(err?.name ?? "");
     if (name === "PasswordException" || msg.includes("password") || msg.includes("need password")) {
       return {
         ok: false,
