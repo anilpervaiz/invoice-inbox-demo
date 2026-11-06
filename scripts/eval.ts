@@ -149,9 +149,11 @@ async function evaluateSet(
             await sleep(15000);
           }
         }
-        aiCallsCount++;
         // Maintain 14 RPM to stay safely under Google free-tier 15 RPM cap
         await sleep(4100);
+      }
+      if (ai.status === "ok") {
+        aiCallsCount++;
       }
       const marker = ai.status === "ok" ? "✓" : "✗";
       process.stdout.write(marker);

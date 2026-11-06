@@ -1,6 +1,6 @@
 {
   "runAt": "2026-11-06",
-  "generatedAt": "2026-11-06T13:01:58.710Z",
+  "generatedAt": "2026-11-06T13:44:46.858Z",
   "model": "gemini-3.5-flash-lite",
   "estimatedAiCostUsd": 0.0352,
   "totalFalseClears": 0,
@@ -13,8 +13,8 @@
       "accuracy": 100
     },
     "ai": {
-      "right": 429,
-      "fieldsChecked": 429,
+      "right": 440,
+      "fieldsChecked": 440,
       "accuracy": 100
     },
     "missingFields": {
