@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "pdfs": "tsx scripts/make-pdfs.ts",
+    "generate:holdout": "tsx eval/holdout/generate.ts",
     "samples": "tsx scripts/build-samples.ts",
     "eval": "tsx scripts/eval.ts",
     "check:release": "tsx scripts/check-release.ts"
