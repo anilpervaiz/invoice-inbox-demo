@@ -1,6 +1,6 @@
 {
-  "simulated": true,
-  "aiRun": false,
+  "simulated": false,
+  "aiRun": true,
   "invoices": [
     {
       "id": "wrong-total",

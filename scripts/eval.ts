@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { aiConfigured, geminiModelId, readWithAi } from "../lib/ai-reader";
 import { processInvoice } from "../lib/decide";
 import { RULE_CONTEXT } from "../lib/demo-data";
@@ -8,6 +8,9 @@ import { EMPTY_FIELDS, SCALAR_FIELDS, type InvoiceFields, type ReadResult } from
 if (existsSync(".env.local")) {
   process.loadEnvFile(".env.local");
 }
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const CACHE_DIR = "data/ai-cache";
 
 const clean = (v: unknown) => (typeof v === "string" ? v.toUpperCase().replace(/[^A-Z0-9]/g, "") : v);
 const matches = (a: unknown, b: unknown) =>
@@ -123,8 +126,35 @@ async function evaluateSet(
     };
 
     if (useAi) {
-      ai = await readWithAi(data.slice());
-      aiCallsCount++;
+      mkdirSync(CACHE_DIR, { recursive: true });
+      const cachePath = `${CACHE_DIR}/${spec.id}.json`;
+      const fresh = process.argv.includes("--fresh");
+      if (!fresh && existsSync(cachePath)) {
+        try {
+          ai = JSON.parse(readFileSync(cachePath, "utf8"));
+        } catch {
+          ai = { reader: "ai", status: "unavailable", note: "Corrupt cache", fields: { ...EMPTY_FIELDS } };
+        }
+      }
+      if (ai.status !== "ok") {
+        let attempts = 0;
+        while (attempts++ < 3) {
+          ai = await readWithAi(data.slice());
+          if (ai.status === "ok") {
+            writeFileSync(cachePath, JSON.stringify(ai, null, 2));
+            break;
+          }
+          if (attempts < 3) {
+            console.log(`[eval] ${spec.id}: returned ${ai.status} (${ai.note}). Retrying in 15s...`);
+            await sleep(15000);
+          }
+        }
+        aiCallsCount++;
+        // Maintain 14 RPM to stay safely under Google free-tier 15 RPM cap
+        await sleep(4100);
+      }
+      const marker = ai.status === "ok" ? "✓" : "✗";
+      process.stdout.write(marker);
     }
 
     if (text.status === "ok") {
@@ -242,8 +272,11 @@ async function main() {
     ? JSON.parse(readFileSync("eval/holdout/truth.json", "utf8"))
     : [];
 
+  console.log(`Evaluating known set (${knownSpecs.length} invoices) with ${useAi ? geminiModelId() : "plain-code"}...`);
   const known = await evaluateSet(knownSpecs, "eval/invoices", useAi);
+  console.log(`\nEvaluating held-out set (${holdoutSpecs.length} invoices) with ${useAi ? geminiModelId() : "plain-code"}...`);
   const heldout = await evaluateSet(holdoutSpecs, "eval/holdout/invoices", useAi);
+  console.log("\nEvaluation complete.");
 
   const totalAiCalls = known.aiCallsCount + heldout.aiCallsCount;
   // Gemini 3.8 Flash estimated cost: approx $0.0004 per PDF read

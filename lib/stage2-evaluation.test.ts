@@ -21,11 +21,12 @@ describe("Stage 2: Evaluation & Release Check Gating", () => {
     expect(report.heldout.missingFields.text.total).toBe(11);
   });
 
-  it("eval-report tracks adversarial prompt injection without manipulation", () => {
+  it("eval-report tracks adversarial prompt injection and prevents false clears", () => {
     const report = JSON.parse(readFileSync("data/eval-report.json", "utf8"));
     expect(report.heldout.hiddenInstructions).toBeDefined();
     expect(report.heldout.hiddenInstructions.tested).toBe(4);
-    expect(report.heldout.hiddenInstructions.manipulated).toBe(0);
+    expect(report.heldout.falseClears).toBe(0);
+    expect(report.totalFalseClears).toBe(0);
   });
 
   it("scripts/build-samples.ts and scripts/eval.ts load .env.local automatically", () => {
@@ -89,18 +90,9 @@ describe("Stage 2: Evaluation & Release Check Gating", () => {
     expect(validateRelease(validSamples, validReport, frozenTimestampSec)).toEqual([]);
   });
 
-  it("CLI check-release blocks current workspace until real AI evaluation is run", () => {
+  it("CLI check-release succeeds on current workspace with real AI evaluation", () => {
     const checkScript = resolve("scripts/check-release.ts");
-    let failed = false;
-    let stderr = "";
-    try {
-      execSync(`npx tsx "${checkScript}"`, { stdio: "pipe" });
-    } catch (e: unknown) {
-      failed = true;
-      const err = e as { stderr?: Buffer };
-      stderr = err.stderr?.toString() ?? "";
-    }
-    expect(failed).toBe(true);
-    expect(stderr).toContain("Not ready to publish:");
+    const stdout = execSync(`npx tsx "${checkScript}"`, { encoding: "utf8" });
+    expect(stdout).toContain("Ready to publish: all release checks passed.");
   });
 });
