@@ -28,3 +28,8 @@ export const RULE_CONTEXT: RuleContext = {
   today: "2026-11-05",
   domesticVatRates: [0, 5],
 };
+
+export function uploadRuleContext(now: Date = new Date()): RuleContext {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dubai" }).format(now);
+  return { ...RULE_CONTEXT, today };
+}

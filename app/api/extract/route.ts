@@ -1,6 +1,6 @@
 import { readWithAi } from "@/lib/ai-reader";
 import { processInvoice } from "@/lib/decide";
-import { RULE_CONTEXT } from "@/lib/demo-data";
+import { uploadRuleContext } from "@/lib/demo-data";
 import { readWithText } from "@/lib/text-reader";
 
 const MAX_BYTES = 4 * 1024 * 1024;
@@ -30,5 +30,5 @@ export async function POST(request: Request) {
   const data = new Uint8Array(await file.arrayBuffer());
   const [text, ai] = await Promise.all([readWithText(data.slice()), readWithAi(data.slice())]);
   const id = `upload-${Date.now()}`;
-  return Response.json(processInvoice(id, file.name, text, ai, RULE_CONTEXT));
+  return Response.json(processInvoice(id, file.name, text, ai, uploadRuleContext()));
 }
