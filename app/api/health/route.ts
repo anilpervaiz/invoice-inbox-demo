@@ -16,15 +16,17 @@ function safeCompare(a: string, b: string): boolean {
 // Public requests run only the plain-code reader (zero AI cost).
 // Full AI verification requires Authorization: Bearer <HEALTH_TOKEN> or x-health-token header.
 export async function GET(request: Request) {
+  const hasAuthAttempt = request.headers.has("authorization") || request.headers.has("x-health-token");
   const authHeader = request.headers.get("authorization");
   const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
-  const token = bearerToken ?? request.headers.get("x-health-token")?.trim() ?? null;
+  const headerToken = request.headers.get("x-health-token")?.trim() || null;
+  const token = (bearerToken || null) ?? headerToken;
 
   const serverHealthToken = process.env.HEALTH_TOKEN?.trim() || null;
-  const isFullCheckRequested = Boolean(token);
+  const isFullCheckRequested = hasAuthAttempt;
 
-  if (token) {
-    if (!serverHealthToken || !safeCompare(token, serverHealthToken)) {
+  if (hasAuthAttempt) {
+    if (!token || !serverHealthToken || !safeCompare(token, serverHealthToken)) {
       return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
     }
   }

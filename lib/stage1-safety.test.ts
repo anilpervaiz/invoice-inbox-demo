@@ -97,6 +97,18 @@ describe("Stage 1 - Task 2: health check spending protection", () => {
     expect(res.status).toBe(401);
     expect(aiSpy).not.toHaveBeenCalled();
 
+    const emptyBearerReq = new Request("http://localhost/api/health", {
+      headers: { Authorization: "Bearer   " },
+    });
+    const emptyBearerRes = await GET(emptyBearerReq);
+    expect(emptyBearerRes.status).toBe(401);
+
+    const basicAuthReq = new Request("http://localhost/api/health", {
+      headers: { Authorization: "Basic dXNlcjpwYXNz" },
+    });
+    const basicAuthRes = await GET(basicAuthReq);
+    expect(basicAuthRes.status).toBe(401);
+
     aiSpy.mockRestore();
     delete process.env.HEALTH_TOKEN;
     delete process.env.GOOGLE_GENERATIVE_AI_API_KEY;
@@ -201,10 +213,13 @@ describe("Stage 1 - Task 3: upload safety checks", () => {
     }
   });
 
-  it("POST /api/extract rejects non-PDF and password-protected files with 400", async () => {
+  it("POST /api/extract rejects non-PDF, password-protected, 50-page, and oversized files", async () => {
+    const { rateLimiter } = await import("./rate-limit");
+    await rateLimiter.reset?.();
     const { POST } = await import("../app/api/extract/route");
+    const PDFDocument = (await import("pdfkit")).default;
 
-    // Fake PDF with application/pdf mime type
+    // 1. Fake PDF with application/pdf mime type
     const form1 = new FormData();
     form1.append("file", new File(["not a pdf"], "fake.pdf", { type: "application/pdf" }));
     const req1 = new Request("http://localhost/api/extract", { method: "POST", body: form1 });
@@ -212,6 +227,70 @@ describe("Stage 1 - Task 3: upload safety checks", () => {
     expect(res1.status).toBe(400);
     const body1 = await res1.json();
     expect(body1.error).toContain("Only PDF files work here");
+
+    // 2. 50-page PDF refused with 400
+    const fiftyPageBytes = await new Promise<Uint8Array>((resolve, reject) => {
+      const doc = new PDFDocument();
+      const chunks: Buffer[] = [];
+      doc.on("data", (c) => chunks.push(c));
+      doc.on("end", () => resolve(new Uint8Array(Buffer.concat(chunks))));
+      doc.on("error", reject);
+      for (let i = 1; i <= 50; i++) {
+        doc.text(`Invoice page ${i}`);
+        if (i < 50) doc.addPage();
+      }
+      doc.end();
+    });
+    const form50 = new FormData();
+    form50.append("file", new File([fiftyPageBytes], "50pages.pdf", { type: "application/pdf" }));
+    const req50 = new Request("http://localhost/api/extract", { method: "POST", body: form50 });
+    const res50 = await POST(req50);
+    expect(res50.status).toBe(400);
+    expect((await res50.json()).error).toContain("5 pages or fewer");
+
+    // 3. Oversized (> 4 MB) file refused with 413
+    const hugeBytes = new Uint8Array(4 * 1024 * 1024 + 200_000);
+    hugeBytes.set([0x25, 0x50, 0x44, 0x46, 0x2d]);
+    const formHuge = new FormData();
+    formHuge.append("file", new File([hugeBytes], "huge.pdf", { type: "application/pdf" }));
+    const reqHuge = new Request("http://localhost/api/extract", { method: "POST", body: formHuge });
+    const resHuge = await POST(reqHuge);
+    expect(resHuge.status).toBe(413);
+    expect((await resHuge.json()).error).toContain("under 4 MB");
+  });
+
+  it("readBoundedFormData aborts chunked streams without Content-Length before reading the whole body", async () => {
+    const { readBoundedFormData } = await import("./upload-guard");
+    let chunksPulled = 0;
+    const oneMbChunk = new Uint8Array(1024 * 1024);
+
+    // 10 MB stream with NO Content-Length header; reader must stop around 4.1 MB (<= 5 chunks), not pull all 10!
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        chunksPulled++;
+        if (chunksPulled > 10) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(oneMbChunk);
+      },
+    });
+
+    const req = new Request("http://localhost/api/extract", {
+      method: "POST",
+      headers: { "content-type": "multipart/form-data; boundary=---testboundary" },
+      body: stream,
+      // @ts-expect-error Node fetch duplex option required for streaming Request bodies
+      duplex: "half",
+    });
+
+    const result = await readBoundedFormData(req);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.status).toBe(413);
+      expect(result.error).toContain("under 4 MB");
+    }
+    expect(chunksPulled).toBeLessThanOrEqual(6);
   });
 });
 
@@ -262,6 +341,22 @@ describe("Stage 1 - Task 4: rate limiter interface & daily total cap & UPLOADS_E
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.error).toContain("disabled");
+    delete process.env.UPLOADS_ENABLED;
+  });
+
+  it("GET /api/extract reports runtime uploadsEnabled state dynamically", async () => {
+    const extractRoute = await import("../app/api/extract/route");
+    expect(typeof (extractRoute as { GET?: unknown }).GET).toBe("function");
+    const getHandler = (extractRoute as unknown as { GET: () => Promise<Response> }).GET;
+
+    process.env.UPLOADS_ENABLED = "false";
+    const resOff = await getHandler();
+    expect((await resOff.json()).uploadsEnabled).toBe(false);
+
+    process.env.UPLOADS_ENABLED = "true";
+    const resOn = await getHandler();
+    expect((await resOn.json()).uploadsEnabled).toBe(true);
+
     delete process.env.UPLOADS_ENABLED;
   });
 });

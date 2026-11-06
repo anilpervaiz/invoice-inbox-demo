@@ -7,6 +7,13 @@ import { inspectPdfUpload, isUploadsEnabled, readBoundedFormData } from "@/lib/u
 
 export const maxDuration = 25;
 
+export async function GET() {
+  return Response.json(
+    { uploadsEnabled: isUploadsEnabled() },
+    { headers: { "Cache-Control": "no-store" } },
+  );
+}
+
 // Files are read in memory and never stored.
 export async function POST(request: Request) {
   if (!isUploadsEnabled()) {

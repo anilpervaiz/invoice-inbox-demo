@@ -95,11 +95,11 @@ function Row({
         selected ? "border-ink bg-sheet" : "border-transparent hover:bg-sheet/60"
       }`}
     >
-      <span className="flex items-baseline justify-between gap-3">
+      <span className="flex min-w-0 items-baseline justify-between gap-3">
         <span className="truncate text-sm font-medium">{f.supplierName ?? invoice.fileName}</span>
         <span className="figures shrink-0 text-xs">{f.total === null ? "" : formatMoney(f.total)}</span>
       </span>
-      <span className="mt-0.5 flex justify-between gap-3 text-xs text-muted">
+      <span className="mt-0.5 flex min-w-0 justify-between gap-3 text-xs text-muted">
         <span className="truncate">{invoice.title ?? invoice.fileName}</span>
         <span className="figures shrink-0">{f.currency}</span>
       </span>
@@ -153,6 +153,7 @@ export function Inbox({
   const [selectedId, setSelectedId] = useState(invoices[0]?.id);
   const [outcomes, setOutcomes] = useState<Stored>({});
   const [uploads, setUploads] = useState<Record<string, string>>({});
+  const [canUpload, setCanUpload] = useState(uploadsEnabled);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -168,6 +169,14 @@ export function Inbox({
     // Read after mount, so the server and first client render match.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOutcomes(load());
+    fetch("/api/extract", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { uploadsEnabled?: boolean } | null) => {
+        if (typeof data?.uploadsEnabled === "boolean") {
+          setCanUpload(data.uploadsEnabled);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const selected = items.find((i) => i.id === selectedId) ?? items[0];
@@ -243,7 +252,7 @@ export function Inbox({
           <p className="text-xs text-muted">Harbourline Accounting · client: Juniper Street Trading</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {uploadsEnabled && (
+          {canUpload && (
             <>
               <input
                 ref={fileInput}
@@ -286,7 +295,7 @@ export function Inbox({
           </a>
           . Every company and invoice here is made up. <strong>Please don&apos;t upload real invoices.</strong>
         </p>
-        {uploadsEnabled && (
+        {canUpload && (
           <p className="mt-1 text-[11px] leading-relaxed text-muted/90">
             Uploaded PDFs are processed in memory and never saved to a database or disk by this site. When AI is enabled,
             the PDF is sent to Google&apos;s Gemini API for extraction. On billed API keys, Google does not train on your
@@ -308,7 +317,7 @@ export function Inbox({
       )}
 
       <main className="grid flex-1 grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_400px]">
-        <nav aria-label="Invoices" className="border-b border-rule lg:border-r lg:border-b-0">
+        <nav aria-label="Invoices" className="min-w-0 border-b border-rule lg:border-r lg:border-b-0">
           {GROUPS.map((g) => {
             const list = open.filter((i) => i.decision.route === g.route);
             if (!list.length) return null;
@@ -345,7 +354,7 @@ export function Inbox({
           )}
         </nav>
 
-        <section aria-label="Invoice document" className="order-3 bg-desk p-4 sm:p-6 lg:order-none">
+        <section aria-label="Invoice document" className="order-3 min-w-0 bg-desk p-4 sm:p-6 lg:order-none">
           {previewUrl ? (
             <iframe src={previewUrl} title={selected.fileName} className="h-[80vh] w-full bg-white" />
           ) : (
@@ -358,7 +367,7 @@ export function Inbox({
           )}
         </section>
 
-        <aside ref={decisionPanel} aria-label="Decision" className="scroll-mt-2 border-l-0 border-rule bg-sheet lg:border-l">
+        <aside ref={decisionPanel} aria-label="Decision" className="min-w-0 scroll-mt-2 border-l-0 border-rule bg-sheet lg:border-l">
           <div className={`border-b p-4 sm:p-5 ${CARD[decision.route]}`}>
             {outcome ? (
               <>

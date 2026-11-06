@@ -76,18 +76,59 @@ export async function readBoundedFormData(
   request: Request,
   maxBytes = MAX_UPLOAD_BYTES,
 ): Promise<BoundedFormResult> {
-  // Check Content-Length header before reading body
+  const maxBodyBytes = maxBytes + MULTIPART_OVERHEAD_BYTES;
+
+  // 1. Check Content-Length header before reading any body bytes
   const contentLengthHeader = request.headers.get("content-length");
   if (contentLengthHeader) {
     const len = Number(contentLengthHeader);
-    if (Number.isFinite(len) && len > maxBytes + MULTIPART_OVERHEAD_BYTES) {
+    if (Number.isFinite(len) && len > maxBodyBytes) {
       return { ok: false, status: 413, error: "Please use a PDF under 4 MB." };
     }
   }
 
+  // 2. Read request stream chunk-by-chunk so chunked/spoofed uploads abort before buffering in memory
+  if (!request.body) {
+    return { ok: false, status: 400, error: "Please choose a PDF." };
+  }
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalRead = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        totalRead += value.byteLength;
+        if (totalRead > maxBodyBytes) {
+          await reader.cancel().catch(() => {});
+          return { ok: false, status: 413, error: "Please use a PDF under 4 MB." };
+        }
+        chunks.push(value);
+      }
+    }
+  } catch {
+    return { ok: false, status: 400, error: "Invalid form upload request." };
+  }
+
+  const combined = new Uint8Array(totalRead);
+  let offset = 0;
+  for (const chunk of chunks) {
+    combined.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
   let formData: FormData;
   try {
-    formData = await request.formData();
+    const contentType = request.headers.get("content-type") ?? "";
+    const boundedRequest = new Request(request.url, {
+      method: request.method,
+      headers: { "content-type": contentType },
+      body: combined,
+    });
+    formData = await boundedRequest.formData();
   } catch {
     return { ok: false, status: 400, error: "Invalid form upload request." };
   }
