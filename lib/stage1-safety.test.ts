@@ -259,3 +259,143 @@ describe("Stage 1 - Task 4: rate limiter interface & daily total cap & UPLOADS_E
     delete process.env.UPLOADS_ENABLED;
   });
 });
+
+describe("Stage 1 - Task 5: timeout protection & safe routing on AI failure", () => {
+  it("routes clean invoice to 'review' (Needs you) when AI times out or errors, never 'ready'", async () => {
+    const { processInvoice } = await import("./decide");
+    const { uploadRuleContext } = await import("./demo-data");
+
+    const textRead = { reader: "text" as const, status: "ok" as const, fields: { ...clean } };
+    const aiTimeoutRead = {
+      reader: "ai" as const,
+      status: "error" as const,
+      fields: { ...clean },
+      note: "The AI reader timed out.",
+    };
+
+    const result = processInvoice("inv-1", "clean.pdf", textRead, aiTimeoutRead, uploadRuleContext());
+    expect(result.decision.route).toBe("review");
+    expect(result.decision.headline).toContain("only one read");
+    expect(result.decision.route).not.toBe("ready");
+  });
+
+  it("routes clean invoice to 'review' when AI key is missing, never 'ready'", async () => {
+    const { processInvoice } = await import("./decide");
+    const { uploadRuleContext } = await import("./demo-data");
+
+    const textRead = { reader: "text" as const, status: "ok" as const, fields: { ...clean } };
+    const aiUnavailable = {
+      reader: "ai" as const,
+      status: "unavailable" as const,
+      fields: { ...clean },
+      note: "No AI key is set.",
+    };
+
+    const result = processInvoice("inv-2", "clean.pdf", textRead, aiUnavailable, uploadRuleContext());
+    expect(result.decision.route).toBe("review");
+    expect(result.decision.headline).toContain("only one read");
+    expect(result.decision.route).not.toBe("ready");
+  });
+
+  it("routes export maxDuration = 25 per Next.js route segment docs", async () => {
+    const extractRoute = await import("../app/api/extract/route");
+    const healthRoute = await import("../app/api/health/route");
+    expect(extractRoute.maxDuration).toBe(25);
+    expect(healthRoute.maxDuration).toBe(25);
+  });
+
+  it("readWithAi times out hanging model calls and returns error status with timeout note", async () => {
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY = "test-key";
+    const { readWithAi } = await import("./ai-reader");
+    const { MockLanguageModelV4 } = await import("ai/test");
+
+    const hangingModel = new MockLanguageModelV4({
+      doGenerate: async ({ abortSignal }) => {
+        return new Promise((_, reject) => {
+          if (abortSignal?.aborted) {
+            reject(abortSignal.reason);
+            return;
+          }
+          abortSignal?.addEventListener("abort", () => reject(abortSignal.reason));
+        });
+      },
+    });
+
+    const result = await readWithAi(new Uint8Array([1, 2, 3]), {
+      timeoutMs: 50,
+      model: hangingModel,
+    });
+
+    expect(result.status).toBe("error");
+    expect(result.note).toBe("The AI reader timed out.");
+
+    delete process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  });
+});
+
+describe("Stage 1 - Task 6: error text sanitization", () => {
+  it("never returns raw provider errors or API keys in ReadResult.note", async () => {
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY = "test-key";
+    const { readWithAi } = await import("./ai-reader");
+
+    const failingModel: any = {
+      specificationVersion: "v1",
+      provider: "mock",
+      modelId: "mock-fail",
+      doGenerate: () => {
+        throw new Error("AI_APICallError: 400 Bad Request to https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSySecretKey12345");
+      },
+    };
+
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = await readWithAi(new Uint8Array([1, 2, 3]), {
+      model: failingModel,
+    });
+
+    expect(result.status).toBe("error");
+    expect(result.note).toBe("The AI reader couldn't read this invoice right now.");
+    expect(result.note).not.toContain("AIzaSy");
+    expect(result.note).not.toContain("https://");
+
+    // Check that server-side console logging sanitized the key
+    expect(consoleSpy).toHaveBeenCalled();
+    const loggedMessage = consoleSpy.mock.calls[0]?.join(" ");
+    expect(loggedMessage).not.toContain("AIzaSySecretKey12345");
+
+    consoleSpy.mockRestore();
+    delete process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  });
+
+  it("text-reader does not return raw stack or exception string in note", async () => {
+    const { readWithText } = await import("./text-reader");
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const corruptedData = new Uint8Array([1, 2, 3, 4, 5]);
+    const result = await readWithText(corruptedData);
+
+    expect(result.status).toBe("error");
+    expect(result.note).toBe("The plain-code reader couldn't read this PDF.");
+    expect(result.note).not.toContain("FormatError");
+
+    consoleSpy.mockRestore();
+  });
+});
+
+describe("Stage 1 - Task 7: model name upgrade to gemini-3.8-flash", () => {
+  it("uses gemini-3.8-flash as default model and respects GEMINI_MODEL override", async () => {
+    delete process.env.GEMINI_MODEL;
+    const { DEFAULT_GEMINI_MODEL, geminiModelId } = await import("./ai-reader");
+
+    expect(DEFAULT_GEMINI_MODEL).toBe("gemini-3.8-flash");
+    expect(geminiModelId()).toBe("gemini-3.8-flash");
+
+    process.env.GEMINI_MODEL = "gemini-3.5-flash-lite";
+    expect(geminiModelId()).toBe("gemini-3.5-flash-lite");
+
+    process.env.GEMINI_MODEL = "  ";
+    expect(geminiModelId()).toBe("gemini-3.8-flash");
+
+    delete process.env.GEMINI_MODEL;
+  });
+});

@@ -8,34 +8,42 @@ type Item = { str: string; x: number; y: number; width: number };
 
 export async function pdfLines(data: Uint8Array): Promise<string[]> {
   const pdf = await getDocumentProxy(new Uint8Array(data));
-  const lines: string[] = [];
-  for (let p = 1; p <= pdf.numPages; p++) {
-    const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    const items: Item[] = [];
-    for (const raw of content.items) {
-      if (!("str" in raw) || !raw.str.trim()) continue;
-      items.push({ str: raw.str, x: raw.transform[4], y: raw.transform[5], width: raw.width });
-    }
-    const rows = new Map<number, Item[]>();
-    for (const item of items) {
-      const key = [...rows.keys()].find((k) => Math.abs(k - item.y) < 3) ?? item.y;
-      rows.set(key, [...(rows.get(key) ?? []), item]);
-    }
-    const ordered = [...rows.entries()].sort(([a], [b]) => b - a);
-    for (const [, row] of ordered) {
-      row.sort((a, b) => a.x - b.x);
-      let text = "";
-      let end = 0;
-      for (const item of row) {
-        if (text) text += item.x - end > 6 ? "   " : " ";
-        text += item.str.trim();
-        end = item.x + item.width;
+  try {
+    const lines: string[] = [];
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const page = await pdf.getPage(p);
+      const content = await page.getTextContent();
+      const items: Item[] = [];
+      for (const raw of content.items) {
+        if (!("str" in raw) || !raw.str.trim()) continue;
+        items.push({ str: raw.str, x: raw.transform[4], y: raw.transform[5], width: raw.width });
       }
-      lines.push(text);
+      const rows = new Map<number, Item[]>();
+      for (const item of items) {
+        const key = [...rows.keys()].find((k) => Math.abs(k - item.y) < 3) ?? item.y;
+        rows.set(key, [...(rows.get(key) ?? []), item]);
+      }
+      const ordered = [...rows.entries()].sort(([a], [b]) => b - a);
+      for (const [, row] of ordered) {
+        row.sort((a, b) => a.x - b.x);
+        let text = "";
+        let end = 0;
+        for (const item of row) {
+          if (text) text += item.x - end > 6 ? "   " : " ";
+          text += item.str.trim();
+          end = item.x + item.width;
+        }
+        lines.push(text);
+      }
+    }
+    return lines;
+  } finally {
+    try {
+      await pdf.loadingTask.destroy();
+    } catch {
+      // Ignore destruction error on teardown
     }
   }
-  return lines;
 }
 
 const MONTHS = "jan feb mar apr may jun jul aug sep oct nov dec".split(" ");
@@ -139,6 +147,7 @@ export async function readWithText(data: Uint8Array): Promise<ReadResult> {
     }
     return { reader: "text", status: "ok", fields: parseLines(lines) };
   } catch (error) {
-    return { reader: "text", status: "error", fields: { ...EMPTY_FIELDS }, note: String(error) };
+    console.error("[text-reader] PDF text parsing failed:", error);
+    return { reader: "text", status: "error", fields: { ...EMPTY_FIELDS }, note: "The plain-code reader couldn't read this PDF." };
   }
 }

@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { aiConfigured, readWithAi } from "../lib/ai-reader";
+import { aiConfigured, geminiModelId, readWithAi } from "../lib/ai-reader";
 import { processInvoice } from "../lib/decide";
 import { RULE_CONTEXT } from "../lib/demo-data";
 import { readWithText } from "../lib/text-reader";
@@ -86,7 +86,7 @@ async function main() {
     invoices: specs.length,
     scans: specs.filter((s) => s.scan).length,
     source: "Generated test invoices in 5 layouts, not real invoices",
-    model: useAi ? (process.env.GEMINI_MODEL ?? "gemini-2.5-flash") : null,
+    model: useAi ? geminiModelId() : null,
     text: { accuracy: pct(textAll), fieldsChecked: textAll.total },
     ai: useAi ? { accuracy: pct(aiAll), fieldsChecked: aiAll.total } : null,
     textByLayout: Object.fromEntries(Object.entries(byLayout).map(([k, v]) => [k, pct(v)])),
