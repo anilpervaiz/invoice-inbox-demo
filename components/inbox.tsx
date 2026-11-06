@@ -236,6 +236,7 @@ export function Inbox({
                 accept="application/pdf"
                 className="hidden"
                 aria-label="Upload a PDF invoice"
+                aria-describedby="upload-privacy-notice"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) void upload(file);
@@ -245,6 +246,7 @@ export function Inbox({
               <button
                 onClick={() => fileInput.current?.click()}
                 disabled={busy}
+                aria-describedby="upload-privacy-notice"
                 className="rounded border border-rule px-3 py-1.5 text-sm hover:bg-paper disabled:opacity-50"
               >
                 {busy ? "Reading…" : "Try your own PDF"}
@@ -261,13 +263,23 @@ export function Inbox({
         </div>
       </header>
 
-      <p className="border-b border-rule bg-desk px-4 py-1.5 text-xs text-muted sm:px-5">
-        Demo by{" "}
-        <a href="https://anilpervaiz.com" className="underline">
-          Anil Pervaiz
-        </a>
-        . Every company and invoice here is made up. Please don&apos;t upload real invoices.
-      </p>
+      <div id="upload-privacy-notice" className="border-b border-rule bg-desk px-4 py-2 text-xs text-muted sm:px-5">
+        <p>
+          Demo by{" "}
+          <a href="https://anilpervaiz.com" className="underline">
+            Anil Pervaiz
+          </a>
+          . Every company and invoice here is made up. <strong>Please don&apos;t upload real invoices.</strong>
+        </p>
+        {uploadsEnabled && (
+          <p className="mt-1 text-[11px] leading-relaxed text-muted/90">
+            Uploaded PDFs are processed in memory and never saved to a database or disk by this site. When AI is enabled,
+            the PDF is sent to Google&apos;s Gemini API for extraction. On billed API keys, Google does not train on your
+            data and logs requests temporarily only for abuse prevention; on free-tier keys, Google terms allow data to
+            be used for model improvement and human review. Do not upload confidential, personal, or financial documents.
+          </p>
+        )}
+      </div>
 
       {simulated && (
         <p className="bg-blocked px-4 py-1.5 text-xs font-medium text-white sm:px-5">

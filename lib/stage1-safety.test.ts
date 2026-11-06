@@ -399,3 +399,24 @@ describe("Stage 1 - Task 7: model name upgrade to gemini-3.8-flash", () => {
     delete process.env.GEMINI_MODEL;
   });
 });
+
+describe("Stage 1 - Task 8: honest upload notice", () => {
+  it("inbox component includes plain disclosure of Google Gemini API terms and warning against real invoices", async () => {
+    const inboxSource = readFileSync("components/inbox.tsx", "utf8");
+
+    // Must disclose in-memory processing without storage
+    expect(inboxSource).toMatch(/in memory|never saved|never stored/i);
+
+    // Must disclose transfer to Google Gemini API
+    expect(inboxSource).toMatch(/Google.*Gemini/i);
+
+    // Must mention terms distinction (billed/paid vs free tier / model training)
+    expect(inboxSource).toMatch(/train/i);
+
+    // Must retain warning against real invoices
+    expect(inboxSource).toMatch(/(?:don['’]t|don&apos;t) upload real invoices/i);
+
+    // Must link upload input via aria-describedby for accessibility
+    expect(inboxSource).toContain('aria-describedby="upload-privacy-notice"');
+  });
+});
