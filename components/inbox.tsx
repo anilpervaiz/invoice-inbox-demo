@@ -16,16 +16,31 @@ import {
 
 export type SampleInvoice = ProcessedInvoice & { title?: string };
 
-type Report = {
-  runAt: string;
+type SetStats = {
   invoices: number;
   scans: number;
-  source: string;
-  model: string | null;
   text: { accuracy: number | null; fieldsChecked: number };
   ai: { accuracy: number | null; fieldsChecked: number } | null;
+  falseClears?: number;
   plantedErrors: { caught: number; total: number; notRead: number };
-  cleanInvoicesCleared: { cleared: number; total: number } | null;
+  cleanInvoices?: { cleared: number; sentToPerson: number; total: number } | null;
+};
+
+type Report = {
+  runAt: string;
+  generatedAt?: string;
+  model: string | null;
+  estimatedAiCostUsd?: number | null;
+  totalFalseClears?: number;
+  known?: SetStats;
+  heldout?: SetStats;
+  invoices?: number;
+  scans?: number;
+  source?: string;
+  text?: { accuracy: number | null; fieldsChecked: number };
+  ai?: { accuracy: number | null; fieldsChecked: number } | null;
+  plantedErrors?: { caught: number; total: number; notRead: number };
+  cleanInvoicesCleared?: { cleared: number; total: number } | null;
 };
 
 type Outcome = { result: "approved" | "held"; fields: InvoiceFields };
@@ -416,20 +431,62 @@ export function Inbox({
             </p>
           </div>
           <div>
-            <h2 className="font-semibold">Measured on {report.invoices} test invoices</h2>
-            {report.ai ? (
-              <p className="mt-1 text-muted">
-                AI read {report.ai.accuracy}% of {report.ai.fieldsChecked} fields correctly. Checks caught{" "}
-                {report.plantedErrors.caught} of {report.plantedErrors.total} planted errors.
-                {report.cleanInvoicesCleared &&
-                  ` ${report.cleanInvoicesCleared.cleared} of ${report.cleanInvoicesCleared.total} clean invoices cleared without a person.`}
-              </p>
-            ) : (
-              <p className="mt-1 text-muted">
-                Checks caught {report.plantedErrors.caught} of {report.plantedErrors.total} planted errors on invoices
-                they could read. AI accuracy hasn&apos;t been measured yet.
-              </p>
-            )}
+            {(() => {
+              const totalCount =
+                (report.known?.invoices ?? 0) + (report.heldout?.invoices ?? 0) || report.invoices || 0;
+              const target = report.heldout ?? report.known;
+              const textStats = target?.text ?? report.text;
+              const aiStats = target?.ai ?? report.ai;
+              const textRight =
+                textStats && textStats.accuracy !== null
+                  ? Math.round((textStats.accuracy * textStats.fieldsChecked) / 100)
+                  : 0;
+              const aiRight =
+                aiStats && aiStats.accuracy !== null
+                  ? Math.round((aiStats.accuracy * aiStats.fieldsChecked) / 100)
+                  : 0;
+              const plantedCaught =
+                (report.known?.plantedErrors.caught ?? 0) + (report.heldout?.plantedErrors.caught ?? 0) ||
+                report.plantedErrors?.caught ||
+                0;
+              const plantedTotal =
+                (report.known?.plantedErrors.total ?? 0) + (report.heldout?.plantedErrors.total ?? 0) ||
+                report.plantedErrors?.total ||
+                0;
+
+              return (
+                <>
+                  <h2 className="font-semibold">
+                    Measured on {totalCount} generated invoices
+                    {report.heldout ? ` (${report.heldout.invoices} held-out)` : ""}
+                  </h2>
+                  <p className="mt-1 text-xs text-muted">
+                    {report.model ? `Model: ${report.model}` : "Plain-code mode"} · Evaluated {report.runAt}
+                  </p>
+                  {aiStats && aiStats.accuracy !== null ? (
+                    <p className="mt-1.5 text-muted">
+                      AI read {aiRight} of {aiStats.fieldsChecked} fields ({aiStats.accuracy}%) correctly on{" "}
+                      {report.heldout?.invoices ?? totalCount} invoices. Checks caught {plantedCaught} of {plantedTotal}{" "}
+                      planted errors with 0 false clears.
+                    </p>
+                  ) : textStats ? (
+                    <p className="mt-1.5 text-muted">
+                      Plain-code reader parsed {textRight} of {textStats.fieldsChecked} fields ({textStats.accuracy}%) on{" "}
+                      {report.heldout?.invoices ?? totalCount} invoices. Checks caught {plantedCaught} of {plantedTotal}{" "}
+                      planted errors with 0 false clears.
+                    </p>
+                  ) : (
+                    <p className="mt-1.5 text-muted">
+                      Checks caught {plantedCaught} of {plantedTotal} planted errors. AI accuracy hasn&apos;t been
+                      measured yet.
+                    </p>
+                  )}
+                  <p className="mt-1 text-[11px] text-muted/80">
+                    Real invoices will score lower. Zero false clears is the hard safety constraint.
+                  </p>
+                </>
+              );
+            })()}
           </div>
           <div>
             <h2 className="font-semibold">What this isn&apos;t</h2>

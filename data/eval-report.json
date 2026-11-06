@@ -1,40 +1,79 @@
 {
-  "runAt": "2026-11-05",
-  "invoices": 40,
-  "scans": 6,
-  "source": "Generated test invoices in 5 layouts, not real invoices",
+  "runAt": "2026-11-06",
+  "generatedAt": "2026-11-06T11:00:41.891Z",
   "model": null,
-  "text": {
-    "accuracy": 100,
-    "fieldsChecked": 374
+  "estimatedAiCostUsd": null,
+  "totalFalseClears": 0,
+  "known": {
+    "invoices": 40,
+    "scans": 6,
+    "text": {
+      "accuracy": 100,
+      "fieldsChecked": 374
+    },
+    "ai": null,
+    "textByField": {
+      "supplierName": 100,
+      "supplierTrn": 100,
+      "invoiceNumber": 100,
+      "issueDate": 100,
+      "dueDate": 100,
+      "currency": 100,
+      "subtotal": 100,
+      "vatRate": 100,
+      "vatAmount": 100,
+      "total": 100,
+      "iban": 100
+    },
+    "aiByField": null,
+    "falseClears": 0,
+    "plantedErrors": {
+      "caught": 12,
+      "total": 12,
+      "notRead": 2
+    },
+    "cleanInvoices": null,
+    "misses": []
   },
-  "ai": null,
-  "textByLayout": {
-    "classic": 100,
-    "band": 100,
-    "minimal": 100,
-    "stripe": 100,
-    "panel": 100
-  },
-  "textByField": {
-    "supplierName": 100,
-    "supplierTrn": 100,
-    "invoiceNumber": 100,
-    "issueDate": 100,
-    "dueDate": 100,
-    "currency": 100,
-    "subtotal": 100,
-    "vatRate": 100,
-    "vatAmount": 100,
-    "total": 100,
-    "iban": 100
-  },
-  "aiByField": null,
-  "plantedErrors": {
-    "caught": 12,
-    "total": 12,
-    "notRead": 2
-  },
-  "cleanInvoicesCleared": null,
-  "misses": []
+  "heldout": {
+    "invoices": 45,
+    "scans": 6,
+    "text": {
+      "accuracy": 63.2,
+      "fieldsChecked": 418
+    },
+    "ai": null,
+    "textByField": {
+      "supplierName": 100,
+      "supplierTrn": 33.3,
+      "invoiceNumber": 20.5,
+      "issueDate": 69.2,
+      "dueDate": 69.4,
+      "currency": 100,
+      "subtotal": 51.3,
+      "vatRate": 56.4,
+      "vatAmount": 56.4,
+      "total": 66.7,
+      "iban": 67.6
+    },
+    "aiByField": null,
+    "falseClears": 0,
+    "plantedErrors": {
+      "caught": 3,
+      "total": 7,
+      "notRead": 0
+    },
+    "cleanInvoices": null,
+    "hiddenInstructions": {
+      "tested": 2,
+      "manipulated": 0
+    },
+    "misses": [
+      "h-pe-wrong-total: wrong_total was not caught by check 'total'",
+      "h-pe-wrong-vat: wrong_vat was not caught by check 'vat-math'",
+      "h-pe-duplicate: duplicate was not caught by check 'duplicate'",
+      "h-pe-duplicate: duplicate went to review, not blocked",
+      "h-hi-visible: wrong_total was not caught by check 'total'"
+    ]
+  }
 }

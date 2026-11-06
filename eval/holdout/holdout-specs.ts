@@ -1,6 +1,6 @@
-import { POSTED, SUPPLIERS } from "../../lib/demo-data";
+import { SUPPLIERS } from "../../lib/demo-data";
 import type { InvoiceFields, LineItem, Supplier } from "../../lib/types";
-import type { HoldoutInvoiceSpec, HoldoutLayout } from "./holdout-pdf";
+import type { HoldoutInvoiceSpec } from "./holdout-pdf";
 
 const round = (n: number) => Math.round(n * 100) / 100;
 
