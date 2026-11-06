@@ -208,3 +208,54 @@ describe("Stage 1 - Task 3: upload safety checks", () => {
     expect(body1.error).toContain("Only PDF files work here");
   });
 });
+
+describe("Stage 1 - Task 4: rate limiter interface & daily total cap & UPLOADS_ENABLED", () => {
+  it("rateLimiter caps requests per IP and per site with clear reasons", async () => {
+    const { createMemoryRateLimiter } = await import("./rate-limit");
+    const limiter = createMemoryRateLimiter({ hourlyPerIp: 2, dailyTotal: 3 });
+
+    // IP 1: hit 1 & 2 pass
+    expect((await limiter.checkAndRecord("1.1.1.1")).allowed).toBe(true);
+    expect((await limiter.checkAndRecord("1.1.1.1")).allowed).toBe(true);
+
+    // IP 1: hit 3 blocked on hourly limit
+    const ipBlock = await limiter.checkAndRecord("1.1.1.1");
+    expect(ipBlock.allowed).toBe(false);
+    if (!ipBlock.allowed) {
+      expect(ipBlock.reason).toBe("hourly_ip");
+      expect(ipBlock.error).toContain("hour");
+    }
+
+    // IP 2: hit 1 passes (site total now 3)
+    expect((await limiter.checkAndRecord("2.2.2.2")).allowed).toBe(true);
+
+    // IP 3: hit 1 blocked on daily site total (site total cap reached)
+    const siteBlock = await limiter.checkAndRecord("3.3.3.3");
+    expect(siteBlock.allowed).toBe(false);
+    if (!siteBlock.allowed) {
+      expect(siteBlock.reason).toBe("daily_site");
+      expect(siteBlock.error).toContain("daily");
+    }
+  });
+
+  it("isUploadsEnabled defaults to off in production and respects env override", async () => {
+    const { isUploadsEnabled } = await import("./upload-guard");
+    expect(isUploadsEnabled({ NODE_ENV: "production" })).toBe(false);
+    expect(isUploadsEnabled({ NODE_ENV: "development" })).toBe(true);
+    expect(isUploadsEnabled({ NODE_ENV: "production", UPLOADS_ENABLED: "true" })).toBe(true);
+    expect(isUploadsEnabled({ NODE_ENV: "development", UPLOADS_ENABLED: "false" })).toBe(false);
+  });
+
+  it("POST /api/extract returns 403 when uploads are disabled", async () => {
+    process.env.UPLOADS_ENABLED = "false";
+    const { POST } = await import("../app/api/extract/route");
+    const form = new FormData();
+    form.append("file", new File(["%PDF-1.4 test"], "test.pdf", { type: "application/pdf" }));
+    const req = new Request("http://localhost/api/extract", { method: "POST", body: form });
+    const res = await POST(req);
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error).toContain("disabled");
+    delete process.env.UPLOADS_ENABLED;
+  });
+});

@@ -127,10 +127,12 @@ export function Inbox({
   invoices,
   simulated,
   report,
+  uploadsEnabled = true,
 }: {
   invoices: SampleInvoice[];
   simulated: boolean;
   report: Report;
+  uploadsEnabled?: boolean;
 }) {
   const [items, setItems] = useState<SampleInvoice[]>(invoices);
   const [selectedId, setSelectedId] = useState(invoices[0]?.id);
@@ -226,25 +228,29 @@ export function Inbox({
           <p className="text-xs text-muted">Harbourline Accounting · client: Juniper Street Trading</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <input
-            ref={fileInput}
-            type="file"
-            accept="application/pdf"
-            className="hidden"
-            aria-label="Upload a PDF invoice"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void upload(file);
-              e.target.value = "";
-            }}
-          />
-          <button
-            onClick={() => fileInput.current?.click()}
-            disabled={busy}
-            className="rounded border border-rule px-3 py-1.5 text-sm hover:bg-paper disabled:opacity-50"
-          >
-            {busy ? "Reading…" : "Try your own PDF"}
-          </button>
+          {uploadsEnabled && (
+            <>
+              <input
+                ref={fileInput}
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                aria-label="Upload a PDF invoice"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void upload(file);
+                  e.target.value = "";
+                }}
+              />
+              <button
+                onClick={() => fileInput.current?.click()}
+                disabled={busy}
+                className="rounded border border-rule px-3 py-1.5 text-sm hover:bg-paper disabled:opacity-50"
+              >
+                {busy ? "Reading…" : "Try your own PDF"}
+              </button>
+            </>
+          )}
           <button
             onClick={exportCsv}
             disabled={!approved.length}

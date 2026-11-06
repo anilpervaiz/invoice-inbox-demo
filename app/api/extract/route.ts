@@ -1,25 +1,31 @@
 import { readWithAi } from "@/lib/ai-reader";
 import { processInvoice } from "@/lib/decide";
 import { uploadRuleContext } from "@/lib/demo-data";
+import { rateLimiter } from "@/lib/rate-limit";
 import { readWithText } from "@/lib/text-reader";
-import { inspectPdfUpload, readBoundedFormData } from "@/lib/upload-guard";
+import { inspectPdfUpload, isUploadsEnabled, readBoundedFormData } from "@/lib/upload-guard";
 
-const HOURLY_LIMIT = 10;
-const hits = new Map<string, number[]>();
-
-function limited(ip: string) {
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < 3_600_000);
-  recent.push(now);
-  hits.set(ip, recent);
-  return recent.length > HOURLY_LIMIT;
-}
+export const maxDuration = 25;
 
 // Files are read in memory and never stored.
 export async function POST(request: Request) {
+  if (!isUploadsEnabled()) {
+    return Response.json(
+      { error: "PDF uploads are currently disabled. You can test all features using the sample invoices." },
+      { status: 403 },
+    );
+  }
+
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (limited(ip)) {
-    return Response.json({ error: "That's the limit for this demo. Try again in an hour." }, { status: 429 });
+  const limitDecision = await rateLimiter.checkAndRecord(ip);
+  if (!limitDecision.allowed) {
+    return Response.json(
+      { error: limitDecision.error },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limitDecision.retryAfterSeconds) },
+      },
+    );
   }
 
   const bounded = await readBoundedFormData(request);
