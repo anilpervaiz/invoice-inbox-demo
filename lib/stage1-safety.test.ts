@@ -138,3 +138,73 @@ describe("Stage 1 - Task 2: health check spending protection", () => {
     vi.restoreAllMocks();
   });
 });
+
+describe("Stage 1 - Task 3: upload safety checks", () => {
+  it("inspectPdfUpload refuses files without real %PDF- header even if mime type is faked", async () => {
+    const { inspectPdfUpload } = await import("./upload-guard");
+    const fakePdfBytes = new TextEncoder().encode("Not a real pdf content");
+    const result = await inspectPdfUpload(fakePdfBytes);
+    expect(result.ok).toBe(false);
+    expect(result.error).toContain("Only PDF files work here");
+  });
+
+  it("inspectPdfUpload refuses password-protected PDFs with a clear message", async () => {
+    const { inspectPdfUpload } = await import("./upload-guard");
+    const PDFDocument = (await import("pdfkit")).default;
+
+    const lockedBytes = await new Promise<Uint8Array>((resolve, reject) => {
+      const doc = new PDFDocument({ userPassword: "pass123", ownerPassword: "owner123" });
+      const chunks: Buffer[] = [];
+      doc.on("data", (c) => chunks.push(c));
+      doc.on("end", () => resolve(new Uint8Array(Buffer.concat(chunks))));
+      doc.on("error", reject);
+      doc.text("Confidential invoice");
+      doc.end();
+    });
+
+    const result = await inspectPdfUpload(lockedBytes);
+    expect(result.ok).toBe(false);
+    expect(result.error).toContain("password-protected");
+  });
+
+  it("inspectPdfUpload enforces the 5-page limit", async () => {
+    const { inspectPdfUpload } = await import("./upload-guard");
+    const PDFDocument = (await import("pdfkit")).default;
+
+    const makePdf = (pages: number) =>
+      new Promise<Uint8Array>((resolve, reject) => {
+        const doc = new PDFDocument();
+        const chunks: Buffer[] = [];
+        doc.on("data", (c) => chunks.push(c));
+        doc.on("end", () => resolve(new Uint8Array(Buffer.concat(chunks))));
+        doc.on("error", reject);
+        for (let i = 1; i <= pages; i++) {
+          doc.text(`Page ${i}`);
+          if (i < pages) doc.addPage();
+        }
+        doc.end();
+      });
+
+    const fivePageBytes = await makePdf(5);
+    const fiveResult = await inspectPdfUpload(fivePageBytes, 5);
+    expect(fiveResult.ok).toBe(true);
+
+    const sixPageBytes = await makePdf(6);
+    const sixResult = await inspectPdfUpload(sixPageBytes, 5);
+    expect(sixResult.ok).toBe(false);
+    expect(sixResult.error).toContain("5 pages or fewer");
+  });
+
+  it("POST /api/extract rejects non-PDF and password-protected files with 400", async () => {
+    const { POST } = await import("../app/api/extract/route");
+
+    // Fake PDF with application/pdf mime type
+    const form1 = new FormData();
+    form1.append("file", new File(["not a pdf"], "fake.pdf", { type: "application/pdf" }));
+    const req1 = new Request("http://localhost/api/extract", { method: "POST", body: form1 });
+    const res1 = await POST(req1);
+    expect(res1.status).toBe(400);
+    const body1 = await res1.json();
+    expect(body1.error).toContain("Only PDF files work here");
+  });
+});

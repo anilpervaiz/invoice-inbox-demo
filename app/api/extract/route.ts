@@ -2,8 +2,8 @@ import { readWithAi } from "@/lib/ai-reader";
 import { processInvoice } from "@/lib/decide";
 import { uploadRuleContext } from "@/lib/demo-data";
 import { readWithText } from "@/lib/text-reader";
+import { inspectPdfUpload, readBoundedFormData } from "@/lib/upload-guard";
 
-const MAX_BYTES = 4 * 1024 * 1024;
 const HOURLY_LIMIT = 10;
 const hits = new Map<string, number[]>();
 
@@ -21,13 +21,18 @@ export async function POST(request: Request) {
   if (limited(ip)) {
     return Response.json({ error: "That's the limit for this demo. Try again in an hour." }, { status: 429 });
   }
-  const form = await request.formData();
-  const file = form.get("file");
-  if (!(file instanceof File)) return Response.json({ error: "Please choose a PDF." }, { status: 400 });
-  if (file.type !== "application/pdf") return Response.json({ error: "Only PDF files work here." }, { status: 400 });
-  if (file.size > MAX_BYTES) return Response.json({ error: "Please use a PDF under 4 MB." }, { status: 400 });
 
-  const data = new Uint8Array(await file.arrayBuffer());
+  const bounded = await readBoundedFormData(request);
+  if (!bounded.ok) {
+    return Response.json({ error: bounded.error }, { status: bounded.status });
+  }
+  const { file, data } = bounded;
+
+  const inspection = await inspectPdfUpload(data);
+  if (!inspection.ok) {
+    return Response.json({ error: inspection.error }, { status: inspection.status });
+  }
+
   const [text, ai] = await Promise.all([readWithText(data.slice()), readWithAi(data.slice())]);
   const id = `upload-${Date.now()}`;
   return Response.json(processInvoice(id, file.name, text, ai, uploadRuleContext()));
