@@ -1,0 +1,1173 @@
+{
+  "simulated": true,
+  "aiRun": false,
+  "invoices": [
+    {
+      "id": "wrong-total",
+      "fileName": "wrong-total.pdf",
+      "fields": {
+        "supplierName": "Blue Dhow Print House LLC",
+        "supplierTrn": "100731264500003",
+        "invoiceNumber": "BD-7741",
+        "issueDate": "2026-10-22",
+        "dueDate": "2026-11-21",
+        "currency": "AED",
+        "subtotal": 4800,
+        "vatRate": 5,
+        "vatAmount": 240,
+        "total": 5380,
+        "iban": "AE00 0260 0000 7731 0092 415",
+        "lines": [
+          {
+            "description": "Annual report printing, 500 copies",
+            "quantity": 500,
+            "unitPrice": 7.2,
+            "amount": 3600
+          },
+          {
+            "description": "Folded brochures, A4",
+            "quantity": 1000,
+            "unitPrice": 1.2,
+            "amount": 1200
+          }
+        ]
+      },
+      "views": [
+        {
+          "field": "supplierName",
+          "value": "Blue Dhow Print House LLC",
+          "agreement": "agreed",
+          "textValue": "Blue Dhow Print House LLC",
+          "aiValue": "Blue Dhow Print House LLC"
+        },
+        {
+          "field": "supplierTrn",
+          "value": "100731264500003",
+          "agreement": "agreed",
+          "textValue": "100731264500003",
+          "aiValue": "100731264500003"
+        },
+        {
+          "field": "invoiceNumber",
+          "value": "BD-7741",
+          "agreement": "agreed",
+          "textValue": "BD-7741",
+          "aiValue": "BD-7741"
+        },
+        {
+          "field": "issueDate",
+          "value": "2026-10-22",
+          "agreement": "agreed",
+          "textValue": "2026-10-22",
+          "aiValue": "2026-10-22"
+        },
+        {
+          "field": "dueDate",
+          "value": "2026-11-21",
+          "agreement": "agreed",
+          "textValue": "2026-11-21",
+          "aiValue": "2026-11-21"
+        },
+        {
+          "field": "currency",
+          "value": "AED",
+          "agreement": "agreed",
+          "textValue": "AED",
+          "aiValue": "AED"
+        },
+        {
+          "field": "subtotal",
+          "value": 4800,
+          "agreement": "agreed",
+          "textValue": 4800,
+          "aiValue": 4800
+        },
+        {
+          "field": "vatRate",
+          "value": 5,
+          "agreement": "agreed",
+          "textValue": 5,
+          "aiValue": 5
+        },
+        {
+          "field": "vatAmount",
+          "value": 240,
+          "agreement": "agreed",
+          "textValue": 240,
+          "aiValue": 240
+        },
+        {
+          "field": "total",
+          "value": 5380,
+          "agreement": "agreed",
+          "textValue": 5380,
+          "aiValue": 5380
+        },
+        {
+          "field": "iban",
+          "value": "AE00 0260 0000 7731 0092 415",
+          "agreement": "agreed",
+          "textValue": "AE00 0260 0000 7731 0092 415",
+          "aiValue": "AE00 0260 0000 7731 0092 415"
+        }
+      ],
+      "checks": [
+        {
+          "id": "required",
+          "label": "Key fields are present",
+          "status": "pass",
+          "detail": "Supplier, number, date and total were all found.",
+          "severity": "review"
+        },
+        {
+          "id": "duplicate",
+          "label": "Not already posted",
+          "status": "pass",
+          "detail": "No match in posted invoices.",
+          "severity": "block"
+        },
+        {
+          "id": "iban",
+          "label": "Bank details match the supplier file",
+          "status": "pass",
+          "detail": "Same IBAN as the supplier file.",
+          "severity": "block"
+        },
+        {
+          "id": "lines",
+          "label": "Lines add up to the subtotal",
+          "status": "pass",
+          "detail": "Lines add to AED 4,800.00.",
+          "severity": "review"
+        },
+        {
+          "id": "total",
+          "label": "Subtotal plus VAT equals the total",
+          "status": "fail",
+          "detail": "Subtotal plus VAT is AED 5,040.00, but the invoice says AED 5,380.00.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-math",
+          "label": "VAT matches the stated rate",
+          "status": "pass",
+          "detail": "5% of the subtotal is AED 240.00.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-rate",
+          "label": "VAT rate is allowed",
+          "status": "pass",
+          "detail": "5% is an expected rate.",
+          "severity": "review"
+        },
+        {
+          "id": "trn",
+          "label": "Supplier TRN looks right",
+          "status": "pass",
+          "detail": "Matches the supplier file.",
+          "severity": "review"
+        },
+        {
+          "id": "dates",
+          "label": "Dates make sense",
+          "status": "pass",
+          "detail": "Invoice date and due date are in order.",
+          "severity": "review"
+        }
+      ],
+      "decision": {
+        "route": "review",
+        "headline": "Needs you: the total doesn't add up",
+        "question": "Subtotal plus VAT is AED 5,040.00, but the invoice says AED 5,380.00. Which amount should be posted?",
+        "options": [
+          {
+            "label": "Post AED 5,040.00",
+            "outcome": "approve",
+            "set": {
+              "total": 5040
+            }
+          },
+          {
+            "label": "Post AED 5,380.00",
+            "outcome": "approve"
+          },
+          {
+            "label": "Hold and ask the supplier",
+            "outcome": "hold"
+          }
+        ]
+      },
+      "reads": {
+        "text": "ok",
+        "ai": "ok"
+      },
+      "title": "Total doesn't add up"
+    },
+    {
+      "id": "new-iban",
+      "fileName": "new-iban.pdf",
+      "fields": {
+        "supplierName": "Swift Falcon Couriers FZE",
+        "supplierTrn": "100918340200003",
+        "invoiceNumber": "SF-88342",
+        "issueDate": "2026-10-29",
+        "dueDate": "2026-11-12",
+        "currency": "AED",
+        "subtotal": 1236,
+        "vatRate": 5,
+        "vatAmount": 61.8,
+        "total": 1297.8,
+        "iban": "AE00 0990 0000 2200 4471 186",
+        "lines": [
+          {
+            "description": "Same day courier, Dubai",
+            "quantity": 42,
+            "unitPrice": 18,
+            "amount": 756
+          },
+          {
+            "description": "Next day courier, Abu Dhabi",
+            "quantity": 15,
+            "unitPrice": 32,
+            "amount": 480
+          }
+        ]
+      },
+      "views": [
+        {
+          "field": "supplierName",
+          "value": "Swift Falcon Couriers FZE",
+          "agreement": "agreed",
+          "textValue": "Swift Falcon Couriers FZE",
+          "aiValue": "Swift Falcon Couriers FZE"
+        },
+        {
+          "field": "supplierTrn",
+          "value": "100918340200003",
+          "agreement": "agreed",
+          "textValue": "100918340200003",
+          "aiValue": "100918340200003"
+        },
+        {
+          "field": "invoiceNumber",
+          "value": "SF-88342",
+          "agreement": "agreed",
+          "textValue": "SF-88342",
+          "aiValue": "SF-88342"
+        },
+        {
+          "field": "issueDate",
+          "value": "2026-10-29",
+          "agreement": "agreed",
+          "textValue": "2026-10-29",
+          "aiValue": "2026-10-29"
+        },
+        {
+          "field": "dueDate",
+          "value": "2026-11-12",
+          "agreement": "agreed",
+          "textValue": "2026-11-12",
+          "aiValue": "2026-11-12"
+        },
+        {
+          "field": "currency",
+          "value": "AED",
+          "agreement": "agreed",
+          "textValue": "AED",
+          "aiValue": "AED"
+        },
+        {
+          "field": "subtotal",
+          "value": 1236,
+          "agreement": "agreed",
+          "textValue": 1236,
+          "aiValue": 1236
+        },
+        {
+          "field": "vatRate",
+          "value": 5,
+          "agreement": "agreed",
+          "textValue": 5,
+          "aiValue": 5
+        },
+        {
+          "field": "vatAmount",
+          "value": 61.8,
+          "agreement": "agreed",
+          "textValue": 61.8,
+          "aiValue": 61.8
+        },
+        {
+          "field": "total",
+          "value": 1297.8,
+          "agreement": "agreed",
+          "textValue": 1297.8,
+          "aiValue": 1297.8
+        },
+        {
+          "field": "iban",
+          "value": "AE00 0990 0000 2200 4471 186",
+          "agreement": "agreed",
+          "textValue": "AE00 0990 0000 2200 4471 186",
+          "aiValue": "AE00 0990 0000 2200 4471 186"
+        }
+      ],
+      "checks": [
+        {
+          "id": "required",
+          "label": "Key fields are present",
+          "status": "pass",
+          "detail": "Supplier, number, date and total were all found.",
+          "severity": "review"
+        },
+        {
+          "id": "duplicate",
+          "label": "Not already posted",
+          "status": "pass",
+          "detail": "No match in posted invoices.",
+          "severity": "block"
+        },
+        {
+          "id": "iban",
+          "label": "Bank details match the supplier file",
+          "status": "fail",
+          "detail": "The invoice asks for payment to AE00 0990 0000 2200 4471 186. The supplier file has AE00 0350 0000 5521 6640 913.",
+          "severity": "block"
+        },
+        {
+          "id": "lines",
+          "label": "Lines add up to the subtotal",
+          "status": "pass",
+          "detail": "Lines add to AED 1,236.00.",
+          "severity": "review"
+        },
+        {
+          "id": "total",
+          "label": "Subtotal plus VAT equals the total",
+          "status": "pass",
+          "detail": "AED 1,297.80 matches the invoice.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-math",
+          "label": "VAT matches the stated rate",
+          "status": "pass",
+          "detail": "5% of the subtotal is AED 61.80.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-rate",
+          "label": "VAT rate is allowed",
+          "status": "pass",
+          "detail": "5% is an expected rate.",
+          "severity": "review"
+        },
+        {
+          "id": "trn",
+          "label": "Supplier TRN looks right",
+          "status": "pass",
+          "detail": "Matches the supplier file.",
+          "severity": "review"
+        },
+        {
+          "id": "dates",
+          "label": "Dates make sense",
+          "status": "pass",
+          "detail": "Invoice date and due date are in order.",
+          "severity": "review"
+        }
+      ],
+      "decision": {
+        "route": "blocked",
+        "headline": "Blocked: bank details have changed",
+        "question": "The invoice asks for payment to AE00 0990 0000 2200 4471 186. The supplier file has AE00 0350 0000 5521 6640 913. Call the supplier on a number you already have before paying.",
+        "options": [
+          {
+            "label": "Keep it blocked",
+            "outcome": "hold"
+          }
+        ]
+      },
+      "reads": {
+        "text": "ok",
+        "ai": "ok"
+      },
+      "title": "Bank details changed"
+    },
+    {
+      "id": "duplicate",
+      "fileName": "duplicate.pdf",
+      "fields": {
+        "supplierName": "Palm Row Catering Services",
+        "supplierTrn": "100265518900003",
+        "invoiceNumber": "PRC-2291",
+        "issueDate": "2026-10-14",
+        "dueDate": "2026-11-13",
+        "currency": "AED",
+        "subtotal": 3200,
+        "vatRate": 5,
+        "vatAmount": 160,
+        "total": 3360,
+        "iban": "AE00 0440 0000 1098 3377 102",
+        "lines": [
+          {
+            "description": "Client lunch catering, 40 people",
+            "quantity": 40,
+            "unitPrice": 65,
+            "amount": 2600
+          },
+          {
+            "description": "Delivery and setup",
+            "quantity": 1,
+            "unitPrice": 600,
+            "amount": 600
+          }
+        ]
+      },
+      "views": [
+        {
+          "field": "supplierName",
+          "value": "Palm Row Catering Services",
+          "agreement": "agreed",
+          "textValue": "Palm Row Catering Services",
+          "aiValue": "Palm Row Catering Services"
+        },
+        {
+          "field": "supplierTrn",
+          "value": "100265518900003",
+          "agreement": "agreed",
+          "textValue": "100265518900003",
+          "aiValue": "100265518900003"
+        },
+        {
+          "field": "invoiceNumber",
+          "value": "PRC-2291",
+          "agreement": "agreed",
+          "textValue": "PRC-2291",
+          "aiValue": "PRC-2291"
+        },
+        {
+          "field": "issueDate",
+          "value": "2026-10-14",
+          "agreement": "agreed",
+          "textValue": "2026-10-14",
+          "aiValue": "2026-10-14"
+        },
+        {
+          "field": "dueDate",
+          "value": "2026-11-13",
+          "agreement": "agreed",
+          "textValue": "2026-11-13",
+          "aiValue": "2026-11-13"
+        },
+        {
+          "field": "currency",
+          "value": "AED",
+          "agreement": "agreed",
+          "textValue": "AED",
+          "aiValue": "AED"
+        },
+        {
+          "field": "subtotal",
+          "value": 3200,
+          "agreement": "agreed",
+          "textValue": 3200,
+          "aiValue": 3200
+        },
+        {
+          "field": "vatRate",
+          "value": 5,
+          "agreement": "agreed",
+          "textValue": 5,
+          "aiValue": 5
+        },
+        {
+          "field": "vatAmount",
+          "value": 160,
+          "agreement": "agreed",
+          "textValue": 160,
+          "aiValue": 160
+        },
+        {
+          "field": "total",
+          "value": 3360,
+          "agreement": "agreed",
+          "textValue": 3360,
+          "aiValue": 3360
+        },
+        {
+          "field": "iban",
+          "value": "AE00 0440 0000 1098 3377 102",
+          "agreement": "agreed",
+          "textValue": "AE00 0440 0000 1098 3377 102",
+          "aiValue": "AE00 0440 0000 1098 3377 102"
+        }
+      ],
+      "checks": [
+        {
+          "id": "required",
+          "label": "Key fields are present",
+          "status": "pass",
+          "detail": "Supplier, number, date and total were all found.",
+          "severity": "review"
+        },
+        {
+          "id": "duplicate",
+          "label": "Not already posted",
+          "status": "fail",
+          "detail": "PRC-2291 from this supplier was already posted on 2026-10-14 for AED 3,360.00.",
+          "severity": "block"
+        },
+        {
+          "id": "iban",
+          "label": "Bank details match the supplier file",
+          "status": "pass",
+          "detail": "Same IBAN as the supplier file.",
+          "severity": "block"
+        },
+        {
+          "id": "lines",
+          "label": "Lines add up to the subtotal",
+          "status": "pass",
+          "detail": "Lines add to AED 3,200.00.",
+          "severity": "review"
+        },
+        {
+          "id": "total",
+          "label": "Subtotal plus VAT equals the total",
+          "status": "pass",
+          "detail": "AED 3,360.00 matches the invoice.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-math",
+          "label": "VAT matches the stated rate",
+          "status": "pass",
+          "detail": "5% of the subtotal is AED 160.00.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-rate",
+          "label": "VAT rate is allowed",
+          "status": "pass",
+          "detail": "5% is an expected rate.",
+          "severity": "review"
+        },
+        {
+          "id": "trn",
+          "label": "Supplier TRN looks right",
+          "status": "pass",
+          "detail": "Matches the supplier file.",
+          "severity": "review"
+        },
+        {
+          "id": "dates",
+          "label": "Dates make sense",
+          "status": "pass",
+          "detail": "Invoice date and due date are in order.",
+          "severity": "review"
+        }
+      ],
+      "decision": {
+        "route": "blocked",
+        "headline": "Blocked: this looks like a duplicate",
+        "question": "PRC-2291 from this supplier was already posted on 2026-10-14 for AED 3,360.00. Paying it again would be a double payment.",
+        "options": [
+          {
+            "label": "Keep it blocked",
+            "outcome": "hold"
+          }
+        ]
+      },
+      "reads": {
+        "text": "ok",
+        "ai": "ok"
+      },
+      "title": "Already posted"
+    },
+    {
+      "id": "scan",
+      "fileName": "scan.pdf",
+      "fields": {
+        "supplierName": "Saltwater IT Support FZ-LLC",
+        "supplierTrn": "100647105800003",
+        "invoiceNumber": "SW-3306",
+        "issueDate": "2026-10-26",
+        "dueDate": "2026-11-25",
+        "currency": "AED",
+        "subtotal": 2740,
+        "vatRate": 5,
+        "vatAmount": 137,
+        "total": 2877,
+        "iban": "AE00 0331 0000 8810 2245 630",
+        "lines": [
+          {
+            "description": "Monthly IT support, October",
+            "quantity": 1,
+            "unitPrice": 2200,
+            "amount": 2200
+          },
+          {
+            "description": "Laptop setup",
+            "quantity": 3,
+            "unitPrice": 180,
+            "amount": 540
+          }
+        ]
+      },
+      "views": [
+        {
+          "field": "supplierName",
+          "value": "Saltwater IT Support FZ-LLC",
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": "Saltwater IT Support FZ-LLC"
+        },
+        {
+          "field": "supplierTrn",
+          "value": "100647105800003",
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": "100647105800003"
+        },
+        {
+          "field": "invoiceNumber",
+          "value": "SW-3306",
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": "SW-3306"
+        },
+        {
+          "field": "issueDate",
+          "value": "2026-10-26",
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": "2026-10-26"
+        },
+        {
+          "field": "dueDate",
+          "value": "2026-11-25",
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": "2026-11-25"
+        },
+        {
+          "field": "currency",
+          "value": "AED",
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": "AED"
+        },
+        {
+          "field": "subtotal",
+          "value": 2740,
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": 2740
+        },
+        {
+          "field": "vatRate",
+          "value": 5,
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": 5
+        },
+        {
+          "field": "vatAmount",
+          "value": 137,
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": 137
+        },
+        {
+          "field": "total",
+          "value": 2877,
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": 2877
+        },
+        {
+          "field": "iban",
+          "value": "AE00 0331 0000 8810 2245 630",
+          "agreement": "single",
+          "textValue": null,
+          "aiValue": "AE00 0331 0000 8810 2245 630"
+        }
+      ],
+      "checks": [
+        {
+          "id": "required",
+          "label": "Key fields are present",
+          "status": "pass",
+          "detail": "Supplier, number, date and total were all found.",
+          "severity": "review"
+        },
+        {
+          "id": "duplicate",
+          "label": "Not already posted",
+          "status": "pass",
+          "detail": "No match in posted invoices.",
+          "severity": "block"
+        },
+        {
+          "id": "iban",
+          "label": "Bank details match the supplier file",
+          "status": "pass",
+          "detail": "Same IBAN as the supplier file.",
+          "severity": "block"
+        },
+        {
+          "id": "lines",
+          "label": "Lines add up to the subtotal",
+          "status": "pass",
+          "detail": "Lines add to AED 2,740.00.",
+          "severity": "review"
+        },
+        {
+          "id": "total",
+          "label": "Subtotal plus VAT equals the total",
+          "status": "pass",
+          "detail": "AED 2,877.00 matches the invoice.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-math",
+          "label": "VAT matches the stated rate",
+          "status": "pass",
+          "detail": "5% of the subtotal is AED 137.00.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-rate",
+          "label": "VAT rate is allowed",
+          "status": "pass",
+          "detail": "5% is an expected rate.",
+          "severity": "review"
+        },
+        {
+          "id": "trn",
+          "label": "Supplier TRN looks right",
+          "status": "pass",
+          "detail": "Matches the supplier file.",
+          "severity": "review"
+        },
+        {
+          "id": "dates",
+          "label": "Dates make sense",
+          "status": "pass",
+          "detail": "Invoice date and due date are in order.",
+          "severity": "review"
+        }
+      ],
+      "decision": {
+        "route": "review",
+        "headline": "Needs you: only one read was possible",
+        "question": "All the checks passed, but only one reader could read this invoice. Do the fields match the document?",
+        "options": [
+          {
+            "label": "Yes, post it",
+            "outcome": "approve"
+          },
+          {
+            "label": "Hold and ask the supplier",
+            "outcome": "hold"
+          }
+        ]
+      },
+      "reads": {
+        "text": "empty",
+        "ai": "ok"
+      },
+      "title": "Scanned invoice"
+    },
+    {
+      "id": "clean-local",
+      "fileName": "clean-local.pdf",
+      "fields": {
+        "supplierName": "Creek Lane Office Supplies LLC",
+        "supplierTrn": "100482917300003",
+        "invoiceNumber": "INV-20418",
+        "issueDate": "2026-10-20",
+        "dueDate": "2026-11-19",
+        "currency": "AED",
+        "subtotal": 2410,
+        "vatRate": 5,
+        "vatAmount": 120.5,
+        "total": 2530.5,
+        "iban": "AE00 0331 0000 1204 8821 007",
+        "lines": [
+          {
+            "description": "A4 copy paper, boxes",
+            "quantity": 12,
+            "unitPrice": 85,
+            "amount": 1020
+          },
+          {
+            "description": "Printer toner, black",
+            "quantity": 4,
+            "unitPrice": 260,
+            "amount": 1040
+          },
+          {
+            "description": "Desk organisers",
+            "quantity": 10,
+            "unitPrice": 35,
+            "amount": 350
+          }
+        ]
+      },
+      "views": [
+        {
+          "field": "supplierName",
+          "value": "Creek Lane Office Supplies LLC",
+          "agreement": "agreed",
+          "textValue": "Creek Lane Office Supplies LLC",
+          "aiValue": "Creek Lane Office Supplies LLC"
+        },
+        {
+          "field": "supplierTrn",
+          "value": "100482917300003",
+          "agreement": "agreed",
+          "textValue": "100482917300003",
+          "aiValue": "100482917300003"
+        },
+        {
+          "field": "invoiceNumber",
+          "value": "INV-20418",
+          "agreement": "agreed",
+          "textValue": "INV-20418",
+          "aiValue": "INV-20418"
+        },
+        {
+          "field": "issueDate",
+          "value": "2026-10-20",
+          "agreement": "agreed",
+          "textValue": "2026-10-20",
+          "aiValue": "2026-10-20"
+        },
+        {
+          "field": "dueDate",
+          "value": "2026-11-19",
+          "agreement": "agreed",
+          "textValue": "2026-11-19",
+          "aiValue": "2026-11-19"
+        },
+        {
+          "field": "currency",
+          "value": "AED",
+          "agreement": "agreed",
+          "textValue": "AED",
+          "aiValue": "AED"
+        },
+        {
+          "field": "subtotal",
+          "value": 2410,
+          "agreement": "agreed",
+          "textValue": 2410,
+          "aiValue": 2410
+        },
+        {
+          "field": "vatRate",
+          "value": 5,
+          "agreement": "agreed",
+          "textValue": 5,
+          "aiValue": 5
+        },
+        {
+          "field": "vatAmount",
+          "value": 120.5,
+          "agreement": "agreed",
+          "textValue": 120.5,
+          "aiValue": 120.5
+        },
+        {
+          "field": "total",
+          "value": 2530.5,
+          "agreement": "agreed",
+          "textValue": 2530.5,
+          "aiValue": 2530.5
+        },
+        {
+          "field": "iban",
+          "value": "AE00 0331 0000 1204 8821 007",
+          "agreement": "agreed",
+          "textValue": "AE00 0331 0000 1204 8821 007",
+          "aiValue": "AE00 0331 0000 1204 8821 007"
+        }
+      ],
+      "checks": [
+        {
+          "id": "required",
+          "label": "Key fields are present",
+          "status": "pass",
+          "detail": "Supplier, number, date and total were all found.",
+          "severity": "review"
+        },
+        {
+          "id": "duplicate",
+          "label": "Not already posted",
+          "status": "pass",
+          "detail": "No match in posted invoices.",
+          "severity": "block"
+        },
+        {
+          "id": "iban",
+          "label": "Bank details match the supplier file",
+          "status": "pass",
+          "detail": "Same IBAN as the supplier file.",
+          "severity": "block"
+        },
+        {
+          "id": "lines",
+          "label": "Lines add up to the subtotal",
+          "status": "pass",
+          "detail": "Lines add to AED 2,410.00.",
+          "severity": "review"
+        },
+        {
+          "id": "total",
+          "label": "Subtotal plus VAT equals the total",
+          "status": "pass",
+          "detail": "AED 2,530.50 matches the invoice.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-math",
+          "label": "VAT matches the stated rate",
+          "status": "pass",
+          "detail": "5% of the subtotal is AED 120.50.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-rate",
+          "label": "VAT rate is allowed",
+          "status": "pass",
+          "detail": "5% is an expected rate.",
+          "severity": "review"
+        },
+        {
+          "id": "trn",
+          "label": "Supplier TRN looks right",
+          "status": "pass",
+          "detail": "Matches the supplier file.",
+          "severity": "review"
+        },
+        {
+          "id": "dates",
+          "label": "Dates make sense",
+          "status": "pass",
+          "detail": "Invoice date and due date are in order.",
+          "severity": "review"
+        }
+      ],
+      "decision": {
+        "route": "ready",
+        "headline": "Ready to post",
+        "question": null,
+        "options": [
+          {
+            "label": "Approve",
+            "outcome": "approve"
+          }
+        ]
+      },
+      "reads": {
+        "text": "ok",
+        "ai": "ok"
+      },
+      "title": "Clean local invoice"
+    },
+    {
+      "id": "clean-foreign",
+      "fileName": "clean-foreign.pdf",
+      "fields": {
+        "supplierName": "Northgate Software Ltd",
+        "supplierTrn": null,
+        "invoiceNumber": "NG-1182",
+        "issueDate": "2026-11-01",
+        "dueDate": "2026-12-01",
+        "currency": "USD",
+        "subtotal": 365,
+        "vatRate": 0,
+        "vatAmount": 0,
+        "total": 365,
+        "iban": "GB00 NGSW 0000 0012 3456 78",
+        "lines": [
+          {
+            "description": "Accounting software licence",
+            "quantity": 5,
+            "unitPrice": 49,
+            "amount": 245
+          },
+          {
+            "description": "Priority support",
+            "quantity": 1,
+            "unitPrice": 120,
+            "amount": 120
+          }
+        ]
+      },
+      "views": [
+        {
+          "field": "supplierName",
+          "value": "Northgate Software Ltd",
+          "agreement": "agreed",
+          "textValue": "Northgate Software Ltd",
+          "aiValue": "Northgate Software Ltd"
+        },
+        {
+          "field": "supplierTrn",
+          "value": null,
+          "agreement": "missing",
+          "textValue": null,
+          "aiValue": null
+        },
+        {
+          "field": "invoiceNumber",
+          "value": "NG-1182",
+          "agreement": "agreed",
+          "textValue": "NG-1182",
+          "aiValue": "NG-1182"
+        },
+        {
+          "field": "issueDate",
+          "value": "2026-11-01",
+          "agreement": "agreed",
+          "textValue": "2026-11-01",
+          "aiValue": "2026-11-01"
+        },
+        {
+          "field": "dueDate",
+          "value": "2026-12-01",
+          "agreement": "agreed",
+          "textValue": "2026-12-01",
+          "aiValue": "2026-12-01"
+        },
+        {
+          "field": "currency",
+          "value": "USD",
+          "agreement": "agreed",
+          "textValue": "USD",
+          "aiValue": "USD"
+        },
+        {
+          "field": "subtotal",
+          "value": 365,
+          "agreement": "agreed",
+          "textValue": 365,
+          "aiValue": 365
+        },
+        {
+          "field": "vatRate",
+          "value": 0,
+          "agreement": "agreed",
+          "textValue": 0,
+          "aiValue": 0
+        },
+        {
+          "field": "vatAmount",
+          "value": 0,
+          "agreement": "agreed",
+          "textValue": 0,
+          "aiValue": 0
+        },
+        {
+          "field": "total",
+          "value": 365,
+          "agreement": "agreed",
+          "textValue": 365,
+          "aiValue": 365
+        },
+        {
+          "field": "iban",
+          "value": "GB00 NGSW 0000 0012 3456 78",
+          "agreement": "agreed",
+          "textValue": "GB00 NGSW 0000 0012 3456 78",
+          "aiValue": "GB00 NGSW 0000 0012 3456 78"
+        }
+      ],
+      "checks": [
+        {
+          "id": "required",
+          "label": "Key fields are present",
+          "status": "pass",
+          "detail": "Supplier, number, date and total were all found.",
+          "severity": "review"
+        },
+        {
+          "id": "duplicate",
+          "label": "Not already posted",
+          "status": "pass",
+          "detail": "No match in posted invoices.",
+          "severity": "block"
+        },
+        {
+          "id": "iban",
+          "label": "Bank details match the supplier file",
+          "status": "pass",
+          "detail": "Same IBAN as the supplier file.",
+          "severity": "block"
+        },
+        {
+          "id": "lines",
+          "label": "Lines add up to the subtotal",
+          "status": "pass",
+          "detail": "Lines add to USD 365.00.",
+          "severity": "review"
+        },
+        {
+          "id": "total",
+          "label": "Subtotal plus VAT equals the total",
+          "status": "pass",
+          "detail": "USD 365.00 matches the invoice.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-math",
+          "label": "VAT matches the stated rate",
+          "status": "pass",
+          "detail": "0% of the subtotal is USD 0.00.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-rate",
+          "label": "VAT rate is allowed",
+          "status": "skip",
+          "detail": "Foreign currency invoice.",
+          "severity": "review"
+        },
+        {
+          "id": "trn",
+          "label": "Supplier TRN looks right",
+          "status": "skip",
+          "detail": "No VAT charged, so no TRN is needed.",
+          "severity": "review"
+        },
+        {
+          "id": "dates",
+          "label": "Dates make sense",
+          "status": "pass",
+          "detail": "Invoice date and due date are in order.",
+          "severity": "review"
+        }
+      ],
+      "decision": {
+        "route": "ready",
+        "headline": "Ready to post",
+        "question": null,
+        "options": [
+          {
+            "label": "Approve",
+            "outcome": "approve"
+          }
+        ]
+      },
+      "reads": {
+        "text": "ok",
+        "ai": "ok"
+      },
+      "title": "Clean foreign invoice"
+    }
+  ]
+}

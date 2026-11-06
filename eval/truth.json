@@ -1,0 +1,1580 @@
+[
+  {
+    "id": "test-01",
+    "layout": "classic",
+    "scan": false,
+    "fields": {
+      "supplierName": "Creek Lane Office Supplies LLC",
+      "supplierTrn": "100482917300003",
+      "invoiceNumber": "CR-22165",
+      "issueDate": "2026-08-17",
+      "dueDate": "2026-09-17",
+      "currency": "AED",
+      "subtotal": 1530,
+      "vatRate": 5,
+      "vatAmount": 76.5,
+      "total": 1696.5,
+      "iban": "AE00 0331 0000 1204 8821 007",
+      "lines": [
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        },
+        {
+          "description": "Air conditioning service",
+          "quantity": 3,
+          "unitPrice": 320,
+          "amount": 960
+        }
+      ]
+    },
+    "expected": {
+      "route": "review",
+      "planted": "wrong_total"
+    }
+  },
+  {
+    "id": "test-02",
+    "layout": "band",
+    "scan": false,
+    "fields": {
+      "supplierName": "Saltwater IT Support FZ-LLC",
+      "supplierTrn": "100647105800003",
+      "invoiceNumber": "SA-30721",
+      "issueDate": "2026-08-06",
+      "dueDate": "2026-09-06",
+      "currency": "AED",
+      "subtotal": 5448,
+      "vatRate": 5,
+      "vatAmount": 272.4,
+      "total": 5720.4,
+      "iban": "AE00 0331 0000 8810 2245 630",
+      "lines": [
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        },
+        {
+          "description": "Printer toner cartridges",
+          "quantity": 6,
+          "unitPrice": 240,
+          "amount": 1440
+        },
+        {
+          "description": "Brochure printing",
+          "quantity": 800,
+          "unitPrice": 1.35,
+          "amount": 1080
+        },
+        {
+          "description": "Courier deliveries",
+          "quantity": 24,
+          "unitPrice": 22,
+          "amount": 528
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-03",
+    "layout": "minimal",
+    "scan": false,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SW-82551",
+      "issueDate": "2026-08-10",
+      "dueDate": "2026-09-10",
+      "currency": "AED",
+      "subtotal": 3180,
+      "vatRate": 5,
+      "vatAmount": 159,
+      "total": 3339,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Staff lunch catering",
+          "quantity": 30,
+          "unitPrice": 55,
+          "amount": 1650
+        },
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        },
+        {
+          "description": "Air conditioning service",
+          "quantity": 3,
+          "unitPrice": 320,
+          "amount": 960
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-04",
+    "layout": "panel",
+    "scan": true,
+    "fields": {
+      "supplierName": "Oasis Grove Cleaning Services LLC",
+      "supplierTrn": "100355279100003",
+      "invoiceNumber": "OA-66265",
+      "issueDate": "2026-08-11",
+      "dueDate": "2026-09-11",
+      "currency": "AED",
+      "subtotal": 1140,
+      "vatRate": 5,
+      "vatAmount": 91.2,
+      "total": 1231.2,
+      "iban": "AE00 0260 0000 4417 9003 288",
+      "lines": [
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        }
+      ]
+    },
+    "expected": {
+      "route": "review",
+      "planted": "wrong_vat"
+    }
+  },
+  {
+    "id": "test-05",
+    "layout": "stripe",
+    "scan": false,
+    "fields": {
+      "supplierName": "Blue Dhow Print House LLC",
+      "supplierTrn": "100731264500003",
+      "invoiceNumber": "BL-12669",
+      "issueDate": "2026-08-25",
+      "dueDate": "2026-09-25",
+      "currency": "AED",
+      "subtotal": 4020,
+      "vatRate": 5,
+      "vatAmount": 201,
+      "total": 4221,
+      "iban": "AE00 0260 0000 7731 0092 415",
+      "lines": [
+        {
+          "description": "Staff lunch catering",
+          "quantity": 30,
+          "unitPrice": 55,
+          "amount": 1650
+        },
+        {
+          "description": "Brochure printing",
+          "quantity": 800,
+          "unitPrice": 1.35,
+          "amount": 1080
+        },
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        },
+        {
+          "description": "Software licences",
+          "quantity": 6,
+          "unitPrice": 120,
+          "amount": 720
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-06",
+    "layout": "classic",
+    "scan": false,
+    "fields": {
+      "supplierName": "Palm Row Catering Services",
+      "supplierTrn": "100265518900003",
+      "invoiceNumber": "PA-40060",
+      "issueDate": "2026-09-27",
+      "dueDate": "2026-10-27",
+      "currency": "AED",
+      "subtotal": 4200,
+      "vatRate": 5,
+      "vatAmount": 210,
+      "total": 4410,
+      "iban": "AE00 0440 0000 1098 3377 102",
+      "lines": [
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        },
+        {
+          "description": "Meeting room hire",
+          "quantity": 4,
+          "unitPrice": 450,
+          "amount": 1800
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-07",
+    "layout": "band",
+    "scan": false,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SW-28624",
+      "issueDate": "2026-08-19",
+      "dueDate": "2026-09-19",
+      "currency": "AED",
+      "subtotal": 4168,
+      "vatRate": 5,
+      "vatAmount": 208.4,
+      "total": 4376.4,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Office cleaning visits",
+          "quantity": 8,
+          "unitPrice": 180,
+          "amount": 1440
+        },
+        {
+          "description": "Courier deliveries",
+          "quantity": 24,
+          "unitPrice": 22,
+          "amount": 528
+        },
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        },
+        {
+          "description": "Air conditioning service",
+          "quantity": 3,
+          "unitPrice": 320,
+          "amount": 960
+        }
+      ]
+    },
+    "expected": {
+      "route": "review",
+      "planted": "bad_lines"
+    }
+  },
+  {
+    "id": "test-08",
+    "layout": "minimal",
+    "scan": false,
+    "fields": {
+      "supplierName": "Palm Row Catering Services",
+      "supplierTrn": "100265518900003",
+      "invoiceNumber": "PA-42971",
+      "issueDate": "2026-08-27",
+      "dueDate": "2026-09-27",
+      "currency": "AED",
+      "subtotal": 3840,
+      "vatRate": 5,
+      "vatAmount": 192,
+      "total": 4032,
+      "iban": "AE00 0440 0000 1098 3377 102",
+      "lines": [
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        },
+        {
+          "description": "Office cleaning visits",
+          "quantity": 8,
+          "unitPrice": 180,
+          "amount": 1440
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-09",
+    "layout": "panel",
+    "scan": false,
+    "fields": {
+      "supplierName": "Palm Row Catering Services",
+      "supplierTrn": "100265518900003",
+      "invoiceNumber": "PA-66692",
+      "issueDate": "2026-08-08",
+      "dueDate": "2026-09-08",
+      "currency": "AED",
+      "subtotal": 2010,
+      "vatRate": 5,
+      "vatAmount": 100.5,
+      "total": 2110.5,
+      "iban": "AE00 0440 0000 1098 3377 102",
+      "lines": [
+        {
+          "description": "Office cleaning visits",
+          "quantity": 8,
+          "unitPrice": 180,
+          "amount": 1440
+        },
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-10",
+    "layout": "stripe",
+    "scan": false,
+    "fields": {
+      "supplierName": "Oasis Grove Cleaning Services LLC",
+      "supplierTrn": "100355279100003",
+      "invoiceNumber": "OG-5519",
+      "issueDate": "2026-08-06",
+      "dueDate": "2026-09-06",
+      "currency": "AED",
+      "subtotal": 1440,
+      "vatRate": 5,
+      "vatAmount": 72,
+      "total": 1512,
+      "iban": "AE00 0260 0000 4417 9003 288",
+      "lines": [
+        {
+          "description": "Office cleaning visits",
+          "quantity": 8,
+          "unitPrice": 180,
+          "amount": 1440
+        }
+      ]
+    },
+    "expected": {
+      "route": "blocked",
+      "planted": "duplicate"
+    }
+  },
+  {
+    "id": "test-11",
+    "layout": "classic",
+    "scan": true,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SW-49089",
+      "issueDate": "2026-08-22",
+      "dueDate": "2026-09-22",
+      "currency": "AED",
+      "subtotal": 5088,
+      "vatRate": 5,
+      "vatAmount": 254.4,
+      "total": 5342.4,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Software licences",
+          "quantity": 6,
+          "unitPrice": 120,
+          "amount": 720
+        },
+        {
+          "description": "Printer toner cartridges",
+          "quantity": 6,
+          "unitPrice": 240,
+          "amount": 1440
+        },
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        },
+        {
+          "description": "Courier deliveries",
+          "quantity": 24,
+          "unitPrice": 22,
+          "amount": 528
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-12",
+    "layout": "band",
+    "scan": false,
+    "fields": {
+      "supplierName": "Oasis Grove Cleaning Services LLC",
+      "supplierTrn": "100355279100003",
+      "invoiceNumber": "OA-71752",
+      "issueDate": "2026-08-02",
+      "dueDate": "2026-09-02",
+      "currency": "AED",
+      "subtotal": 1440,
+      "vatRate": 5,
+      "vatAmount": 72,
+      "total": 1512,
+      "iban": "AE00 0260 0000 4417 9003 288",
+      "lines": [
+        {
+          "description": "Printer toner cartridges",
+          "quantity": 6,
+          "unitPrice": 240,
+          "amount": 1440
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-13",
+    "layout": "minimal",
+    "scan": false,
+    "fields": {
+      "supplierName": "Saltwater IT Support FZ-LLC",
+      "supplierTrn": "100647105800003",
+      "invoiceNumber": "SA-24742",
+      "issueDate": "2026-08-14",
+      "dueDate": "2026-09-14",
+      "currency": "AED",
+      "subtotal": 5070,
+      "vatRate": 5,
+      "vatAmount": 253.5,
+      "total": 5323.5,
+      "iban": "AE00 0990 0000 1012 4471 186",
+      "lines": [
+        {
+          "description": "Brochure printing",
+          "quantity": 800,
+          "unitPrice": 1.35,
+          "amount": 1080
+        },
+        {
+          "description": "Translation of contracts",
+          "quantity": 7,
+          "unitPrice": 150,
+          "amount": 1050
+        },
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        },
+        {
+          "description": "Meeting room hire",
+          "quantity": 4,
+          "unitPrice": 450,
+          "amount": 1800
+        }
+      ]
+    },
+    "expected": {
+      "route": "blocked",
+      "planted": "iban_change"
+    }
+  },
+  {
+    "id": "test-14",
+    "layout": "panel",
+    "scan": false,
+    "fields": {
+      "supplierName": "Oasis Grove Cleaning Services LLC",
+      "supplierTrn": "100355279100003",
+      "invoiceNumber": "OA-67074",
+      "issueDate": "2026-09-10",
+      "dueDate": "2026-10-10",
+      "currency": "AED",
+      "subtotal": 1800,
+      "vatRate": 5,
+      "vatAmount": 90,
+      "total": 1890,
+      "iban": "AE00 0260 0000 4417 9003 288",
+      "lines": [
+        {
+          "description": "Software licences",
+          "quantity": 6,
+          "unitPrice": 120,
+          "amount": 720
+        },
+        {
+          "description": "Brochure printing",
+          "quantity": 800,
+          "unitPrice": 1.35,
+          "amount": 1080
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-15",
+    "layout": "stripe",
+    "scan": false,
+    "fields": {
+      "supplierName": "Saltwater IT Support FZ-LLC",
+      "supplierTrn": "100647105800003",
+      "invoiceNumber": "SA-64453",
+      "issueDate": "2026-09-08",
+      "dueDate": "2026-10-08",
+      "currency": "AED",
+      "subtotal": 4500,
+      "vatRate": 5,
+      "vatAmount": 225,
+      "total": 4725,
+      "iban": "AE00 0331 0000 8810 2245 630",
+      "lines": [
+        {
+          "description": "Air conditioning service",
+          "quantity": 3,
+          "unitPrice": 320,
+          "amount": 960
+        },
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        },
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-16",
+    "layout": "classic",
+    "scan": false,
+    "fields": {
+      "supplierName": "Palm Row Catering Services",
+      "supplierTrn": "100265518900003",
+      "invoiceNumber": "PA-64251",
+      "issueDate": "2026-09-14",
+      "dueDate": "2026-10-14",
+      "currency": "AED",
+      "subtotal": 2970,
+      "vatRate": 5,
+      "vatAmount": 148.5,
+      "total": 3208.5,
+      "iban": "AE00 0440 0000 1098 3377 102",
+      "lines": [
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        },
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        }
+      ]
+    },
+    "expected": {
+      "route": "review",
+      "planted": "wrong_total"
+    }
+  },
+  {
+    "id": "test-17",
+    "layout": "band",
+    "scan": false,
+    "fields": {
+      "supplierName": "Blue Dhow Print House LLC",
+      "supplierTrn": "100731264500003",
+      "invoiceNumber": "BL-46298",
+      "issueDate": "2026-09-26",
+      "dueDate": "2026-10-26",
+      "currency": "AED",
+      "subtotal": 4548,
+      "vatRate": 5,
+      "vatAmount": 227.4,
+      "total": 4775.4,
+      "iban": "AE00 0260 0000 7731 0092 415",
+      "lines": [
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        },
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        },
+        {
+          "description": "Courier deliveries",
+          "quantity": 24,
+          "unitPrice": 22,
+          "amount": 528
+        },
+        {
+          "description": "Translation of contracts",
+          "quantity": 7,
+          "unitPrice": 150,
+          "amount": 1050
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-18",
+    "layout": "minimal",
+    "scan": true,
+    "fields": {
+      "supplierName": "Saltwater IT Support FZ-LLC",
+      "supplierTrn": "100647105800003",
+      "invoiceNumber": "SA-81406",
+      "issueDate": "2026-08-04",
+      "dueDate": "2026-09-04",
+      "currency": "AED",
+      "subtotal": 5490,
+      "vatRate": 5,
+      "vatAmount": 274.5,
+      "total": 5764.5,
+      "iban": "AE00 0331 0000 8810 2245 630",
+      "lines": [
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        },
+        {
+          "description": "Office cleaning visits",
+          "quantity": 8,
+          "unitPrice": 180,
+          "amount": 1440
+        },
+        {
+          "description": "Staff lunch catering",
+          "quantity": 30,
+          "unitPrice": 55,
+          "amount": 1650
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-19",
+    "layout": "panel",
+    "scan": false,
+    "fields": {
+      "supplierName": "Oasis Grove Cleaning Services LLC",
+      "supplierTrn": "100355279100003",
+      "invoiceNumber": "OA-23034",
+      "issueDate": "2026-08-20",
+      "dueDate": "2026-09-20",
+      "currency": "AED",
+      "subtotal": 1140,
+      "vatRate": 5,
+      "vatAmount": 91.2,
+      "total": 1231.2,
+      "iban": "AE00 0260 0000 4417 9003 288",
+      "lines": [
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        }
+      ]
+    },
+    "expected": {
+      "route": "review",
+      "planted": "wrong_vat"
+    }
+  },
+  {
+    "id": "test-20",
+    "layout": "stripe",
+    "scan": false,
+    "fields": {
+      "supplierName": "Oasis Grove Cleaning Services LLC",
+      "supplierTrn": "100355279100003",
+      "invoiceNumber": "OA-84941",
+      "issueDate": "2026-08-22",
+      "dueDate": "2026-09-22",
+      "currency": "AED",
+      "subtotal": 1140,
+      "vatRate": 5,
+      "vatAmount": 57,
+      "total": 1197,
+      "iban": "AE00 0260 0000 4417 9003 288",
+      "lines": [
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-21",
+    "layout": "classic",
+    "scan": false,
+    "fields": {
+      "supplierName": "Creek Lane Office Supplies LLC",
+      "supplierTrn": "100482917300003",
+      "invoiceNumber": "CR-55003",
+      "issueDate": "2026-09-07",
+      "dueDate": "2026-10-07",
+      "currency": "AED",
+      "subtotal": 570,
+      "vatRate": 5,
+      "vatAmount": 28.5,
+      "total": 598.5,
+      "iban": "AE00 0331 0000 1204 8821 007",
+      "lines": [
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-22",
+    "layout": "band",
+    "scan": false,
+    "fields": {
+      "supplierName": "Saltwater IT Support FZ-LLC",
+      "supplierTrn": "100647105800003",
+      "invoiceNumber": "SA-60523",
+      "issueDate": "2026-09-03",
+      "dueDate": "2026-10-03",
+      "currency": "AED",
+      "subtotal": 2970,
+      "vatRate": 5,
+      "vatAmount": 148.5,
+      "total": 3118.5,
+      "iban": "AE00 0990 0000 1021 4471 186",
+      "lines": [
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        },
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        }
+      ]
+    },
+    "expected": {
+      "route": "blocked",
+      "planted": "iban_change"
+    }
+  },
+  {
+    "id": "test-23",
+    "layout": "minimal",
+    "scan": false,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SW-87479",
+      "issueDate": "2026-08-16",
+      "dueDate": "2026-09-16",
+      "currency": "AED",
+      "subtotal": 2298,
+      "vatRate": 5,
+      "vatAmount": 114.9,
+      "total": 2412.9,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Translation of contracts",
+          "quantity": 7,
+          "unitPrice": 150,
+          "amount": 1050
+        },
+        {
+          "description": "Courier deliveries",
+          "quantity": 24,
+          "unitPrice": 22,
+          "amount": 528
+        },
+        {
+          "description": "Software licences",
+          "quantity": 6,
+          "unitPrice": 120,
+          "amount": 720
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-24",
+    "layout": "panel",
+    "scan": false,
+    "fields": {
+      "supplierName": "Palm Row Catering Services",
+      "supplierTrn": "100265518900003",
+      "invoiceNumber": "PA-82832",
+      "issueDate": "2026-08-17",
+      "dueDate": "2026-09-17",
+      "currency": "AED",
+      "subtotal": 1080,
+      "vatRate": 5,
+      "vatAmount": 54,
+      "total": 1134,
+      "iban": "AE00 0440 0000 1098 3377 102",
+      "lines": [
+        {
+          "description": "Brochure printing",
+          "quantity": 800,
+          "unitPrice": 1.35,
+          "amount": 1080
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-25",
+    "layout": "stripe",
+    "scan": true,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SW-21538",
+      "issueDate": "2026-09-21",
+      "dueDate": "2026-10-21",
+      "currency": "AED",
+      "subtotal": 5230,
+      "vatRate": 5,
+      "vatAmount": 261.5,
+      "total": 5491.5,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Office cleaning visits",
+          "quantity": 8,
+          "unitPrice": 180,
+          "amount": 1440
+        },
+        {
+          "description": "Staff lunch catering",
+          "quantity": 30,
+          "unitPrice": 55,
+          "amount": 1650
+        },
+        {
+          "description": "Air conditioning service",
+          "quantity": 3,
+          "unitPrice": 320,
+          "amount": 960
+        },
+        {
+          "description": "Brochure printing",
+          "quantity": 800,
+          "unitPrice": 1.35,
+          "amount": 1080
+        }
+      ]
+    },
+    "expected": {
+      "route": "review",
+      "planted": "bad_lines"
+    }
+  },
+  {
+    "id": "test-26",
+    "layout": "classic",
+    "scan": false,
+    "fields": {
+      "supplierName": "Saltwater IT Support FZ-LLC",
+      "supplierTrn": "100647105800003",
+      "invoiceNumber": "SA-70510",
+      "issueDate": "2026-08-16",
+      "dueDate": "2026-09-16",
+      "currency": "AED",
+      "subtotal": 720,
+      "vatRate": 5,
+      "vatAmount": 36,
+      "total": 756,
+      "iban": "AE00 0331 0000 8810 2245 630",
+      "lines": [
+        {
+          "description": "Software licences",
+          "quantity": 6,
+          "unitPrice": 120,
+          "amount": 720
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-27",
+    "layout": "band",
+    "scan": false,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SW-12301",
+      "issueDate": "2026-08-19",
+      "dueDate": "2026-09-19",
+      "currency": "AED",
+      "subtotal": 5400,
+      "vatRate": 5,
+      "vatAmount": 270,
+      "total": 5670,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Office cleaning visits",
+          "quantity": 8,
+          "unitPrice": 180,
+          "amount": 1440
+        },
+        {
+          "description": "Printer toner cartridges",
+          "quantity": 6,
+          "unitPrice": 240,
+          "amount": 1440
+        },
+        {
+          "description": "Meeting room hire",
+          "quantity": 4,
+          "unitPrice": 450,
+          "amount": 1800
+        },
+        {
+          "description": "Software licences",
+          "quantity": 6,
+          "unitPrice": 120,
+          "amount": 720
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-28",
+    "layout": "minimal",
+    "scan": false,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SF-88120",
+      "issueDate": "2026-09-15",
+      "dueDate": "2026-10-15",
+      "currency": "AED",
+      "subtotal": 5100,
+      "vatRate": 5,
+      "vatAmount": 255,
+      "total": 5355,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        },
+        {
+          "description": "Printer toner cartridges",
+          "quantity": 6,
+          "unitPrice": 240,
+          "amount": 1440
+        },
+        {
+          "description": "Software licences",
+          "quantity": 6,
+          "unitPrice": 120,
+          "amount": 720
+        },
+        {
+          "description": "Meeting room hire",
+          "quantity": 4,
+          "unitPrice": 450,
+          "amount": 1800
+        }
+      ]
+    },
+    "expected": {
+      "route": "blocked",
+      "planted": "duplicate"
+    }
+  },
+  {
+    "id": "test-29",
+    "layout": "panel",
+    "scan": false,
+    "fields": {
+      "supplierName": "Palm Row Catering Services",
+      "supplierTrn": "100265518900003",
+      "invoiceNumber": "PA-72689",
+      "issueDate": "2026-09-18",
+      "dueDate": "2026-10-18",
+      "currency": "AED",
+      "subtotal": 3840,
+      "vatRate": 5,
+      "vatAmount": 192,
+      "total": 4032,
+      "iban": "AE00 0440 0000 1098 3377 102",
+      "lines": [
+        {
+          "description": "Brochure printing",
+          "quantity": 800,
+          "unitPrice": 1.35,
+          "amount": 1080
+        },
+        {
+          "description": "Meeting room hire",
+          "quantity": 4,
+          "unitPrice": 450,
+          "amount": 1800
+        },
+        {
+          "description": "Air conditioning service",
+          "quantity": 3,
+          "unitPrice": 320,
+          "amount": 960
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-30",
+    "layout": "stripe",
+    "scan": false,
+    "fields": {
+      "supplierName": "Saltwater IT Support FZ-LLC",
+      "supplierTrn": "100647105800003",
+      "invoiceNumber": "SA-85995",
+      "issueDate": "2026-09-20",
+      "dueDate": "2026-10-20",
+      "currency": "AED",
+      "subtotal": 5490,
+      "vatRate": 5,
+      "vatAmount": 274.5,
+      "total": 5764.5,
+      "iban": "AE00 0331 0000 8810 2245 630",
+      "lines": [
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        },
+        {
+          "description": "Printer toner cartridges",
+          "quantity": 6,
+          "unitPrice": 240,
+          "amount": 1440
+        },
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        },
+        {
+          "description": "Brochure printing",
+          "quantity": 800,
+          "unitPrice": 1.35,
+          "amount": 1080
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-31",
+    "layout": "classic",
+    "scan": false,
+    "fields": {
+      "supplierName": "Saltwater IT Support FZ-LLC",
+      "supplierTrn": "100647105800003",
+      "invoiceNumber": "SA-50899",
+      "issueDate": "2026-09-20",
+      "dueDate": "2026-10-20",
+      "currency": "AED",
+      "subtotal": 1440,
+      "vatRate": 5,
+      "vatAmount": 72,
+      "total": 1602,
+      "iban": "AE00 0331 0000 8810 2245 630",
+      "lines": [
+        {
+          "description": "Printer toner cartridges",
+          "quantity": 6,
+          "unitPrice": 240,
+          "amount": 1440
+        }
+      ]
+    },
+    "expected": {
+      "route": "review",
+      "planted": "wrong_total"
+    }
+  },
+  {
+    "id": "test-32",
+    "layout": "band",
+    "scan": true,
+    "fields": {
+      "supplierName": "Oasis Grove Cleaning Services LLC",
+      "supplierTrn": "100355279100003",
+      "invoiceNumber": "OA-26407",
+      "issueDate": "2026-08-04",
+      "dueDate": "2026-09-04",
+      "currency": "AED",
+      "subtotal": 3318,
+      "vatRate": 5,
+      "vatAmount": 165.9,
+      "total": 3483.9,
+      "iban": "AE00 0260 0000 4417 9003 288",
+      "lines": [
+        {
+          "description": "Staff lunch catering",
+          "quantity": 30,
+          "unitPrice": 55,
+          "amount": 1650
+        },
+        {
+          "description": "Courier deliveries",
+          "quantity": 24,
+          "unitPrice": 22,
+          "amount": 528
+        },
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-33",
+    "layout": "minimal",
+    "scan": false,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SW-32293",
+      "issueDate": "2026-09-13",
+      "dueDate": "2026-10-13",
+      "currency": "AED",
+      "subtotal": 4410,
+      "vatRate": 5,
+      "vatAmount": 220.5,
+      "total": 4630.5,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Printer toner cartridges",
+          "quantity": 6,
+          "unitPrice": 240,
+          "amount": 1440
+        },
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        },
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-34",
+    "layout": "panel",
+    "scan": false,
+    "fields": {
+      "supplierName": "Palm Row Catering Services",
+      "supplierTrn": "100265518900003",
+      "invoiceNumber": "PA-78911",
+      "issueDate": "2026-09-11",
+      "dueDate": "2026-10-11",
+      "currency": "AED",
+      "subtotal": 4920,
+      "vatRate": 5,
+      "vatAmount": 246,
+      "total": 5166,
+      "iban": "AE00 0990 0000 1033 4471 186",
+      "lines": [
+        {
+          "description": "Office cleaning visits",
+          "quantity": 8,
+          "unitPrice": 180,
+          "amount": 1440
+        },
+        {
+          "description": "Brochure printing",
+          "quantity": 800,
+          "unitPrice": 1.35,
+          "amount": 1080
+        },
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        }
+      ]
+    },
+    "expected": {
+      "route": "blocked",
+      "planted": "iban_change"
+    }
+  },
+  {
+    "id": "test-35",
+    "layout": "stripe",
+    "scan": false,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SW-60332",
+      "issueDate": "2026-09-21",
+      "dueDate": "2026-10-21",
+      "currency": "AED",
+      "subtotal": 1800,
+      "vatRate": 5,
+      "vatAmount": 90,
+      "total": 1890,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Meeting room hire",
+          "quantity": 4,
+          "unitPrice": 450,
+          "amount": 1800
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-36",
+    "layout": "classic",
+    "scan": false,
+    "fields": {
+      "supplierName": "Palm Row Catering Services",
+      "supplierTrn": "100265518900003",
+      "invoiceNumber": "PA-45588",
+      "issueDate": "2026-08-26",
+      "dueDate": "2026-09-26",
+      "currency": "AED",
+      "subtotal": 4518,
+      "vatRate": 5,
+      "vatAmount": 225.9,
+      "total": 4743.9,
+      "iban": "AE00 0440 0000 1098 3377 102",
+      "lines": [
+        {
+          "description": "Translation of contracts",
+          "quantity": 7,
+          "unitPrice": 150,
+          "amount": 1050
+        },
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        },
+        {
+          "description": "Meeting room hire",
+          "quantity": 4,
+          "unitPrice": 450,
+          "amount": 1800
+        },
+        {
+          "description": "Courier deliveries",
+          "quantity": 24,
+          "unitPrice": 22,
+          "amount": 528
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-37",
+    "layout": "band",
+    "scan": false,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SW-45606",
+      "issueDate": "2026-08-09",
+      "dueDate": "2026-09-09",
+      "currency": "AED",
+      "subtotal": 4050,
+      "vatRate": 5,
+      "vatAmount": 202.5,
+      "total": 4342.5,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Monthly support retainer",
+          "quantity": 1,
+          "unitPrice": 2400,
+          "amount": 2400
+        },
+        {
+          "description": "Staff lunch catering",
+          "quantity": 30,
+          "unitPrice": 55,
+          "amount": 1650
+        }
+      ]
+    },
+    "expected": {
+      "route": "review",
+      "planted": "wrong_total"
+    }
+  },
+  {
+    "id": "test-38",
+    "layout": "minimal",
+    "scan": false,
+    "fields": {
+      "supplierName": "Creek Lane Office Supplies LLC",
+      "supplierTrn": "100482917300003",
+      "invoiceNumber": "CR-20421",
+      "issueDate": "2026-08-02",
+      "dueDate": "2026-09-02",
+      "currency": "AED",
+      "subtotal": 5160,
+      "vatRate": 5,
+      "vatAmount": 258,
+      "total": 5418,
+      "iban": "AE00 0331 0000 1204 8821 007",
+      "lines": [
+        {
+          "description": "Stationery bundle",
+          "quantity": 15,
+          "unitPrice": 38,
+          "amount": 570
+        },
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        },
+        {
+          "description": "Staff lunch catering",
+          "quantity": 30,
+          "unitPrice": 55,
+          "amount": 1650
+        },
+        {
+          "description": "Meeting room hire",
+          "quantity": 4,
+          "unitPrice": 450,
+          "amount": 1800
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-39",
+    "layout": "panel",
+    "scan": true,
+    "fields": {
+      "supplierName": "Swift Falcon Couriers FZE",
+      "supplierTrn": "100918340200003",
+      "invoiceNumber": "SW-84336",
+      "issueDate": "2026-09-11",
+      "dueDate": "2026-10-11",
+      "currency": "AED",
+      "subtotal": 1650,
+      "vatRate": 5,
+      "vatAmount": 82.5,
+      "total": 1732.5,
+      "iban": "AE00 0350 0000 5521 6640 913",
+      "lines": [
+        {
+          "description": "Staff lunch catering",
+          "quantity": 30,
+          "unitPrice": 55,
+          "amount": 1650
+        }
+      ]
+    },
+    "expected": {
+      "route": "ready",
+      "planted": null
+    }
+  },
+  {
+    "id": "test-40",
+    "layout": "stripe",
+    "scan": false,
+    "fields": {
+      "supplierName": "Creek Lane Office Supplies LLC",
+      "supplierTrn": "100482917300003",
+      "invoiceNumber": "CR-46778",
+      "issueDate": "2026-08-13",
+      "dueDate": "2026-09-13",
+      "currency": "AED",
+      "subtotal": 4188,
+      "vatRate": 5,
+      "vatAmount": 335.04,
+      "total": 4523.04,
+      "iban": "AE00 0331 0000 1204 8821 007",
+      "lines": [
+        {
+          "description": "Brochure printing",
+          "quantity": 800,
+          "unitPrice": 1.35,
+          "amount": 1080
+        },
+        {
+          "description": "Courier deliveries",
+          "quantity": 24,
+          "unitPrice": 22,
+          "amount": 528
+        },
+        {
+          "description": "Office cleaning visits",
+          "quantity": 8,
+          "unitPrice": 180,
+          "amount": 1440
+        },
+        {
+          "description": "Network cabling work",
+          "quantity": 12,
+          "unitPrice": 95,
+          "amount": 1140
+        }
+      ]
+    },
+    "expected": {
+      "route": "review",
+      "planted": "wrong_vat"
+    }
+  }
+]

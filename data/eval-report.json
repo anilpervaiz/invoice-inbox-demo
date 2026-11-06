@@ -1,0 +1,40 @@
+{
+  "runAt": "2026-11-05",
+  "invoices": 40,
+  "scans": 6,
+  "source": "Generated test invoices in 5 layouts, not real invoices",
+  "model": null,
+  "text": {
+    "accuracy": 100,
+    "fieldsChecked": 374
+  },
+  "ai": null,
+  "textByLayout": {
+    "classic": 100,
+    "band": 100,
+    "minimal": 100,
+    "stripe": 100,
+    "panel": 100
+  },
+  "textByField": {
+    "supplierName": 100,
+    "supplierTrn": 100,
+    "invoiceNumber": 100,
+    "issueDate": 100,
+    "dueDate": 100,
+    "currency": 100,
+    "subtotal": 100,
+    "vatRate": 100,
+    "vatAmount": 100,
+    "total": 100,
+    "iban": 100
+  },
+  "aiByField": null,
+  "plantedErrors": {
+    "caught": 12,
+    "total": 12,
+    "notRead": 2
+  },
+  "cleanInvoicesCleared": null,
+  "misses": []
+}

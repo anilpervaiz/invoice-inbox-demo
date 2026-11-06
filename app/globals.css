@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f7f5ef;
+  --sheet: #fffdf8;
+  --ink: #1d1c18;
+  --muted: #6a675e;
+  --rule: #ddd8cb;
+  --desk: #e9e5da;
+  --ready: #1f6b52;
+  --ready-soft: #e2efe8;
+  --review: #9a6508;
+  --review-soft: #f8ecd2;
+  --blocked: #b02a1f;
+  --blocked-soft: #f8e1dd;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-desk: var(--desk);
+  --color-ready: var(--ready);
+  --color-ready-soft: var(--ready-soft);
+  --color-review: var(--review);
+  --color-review-soft: var(--review-soft);
+  --color-blocked: var(--blocked);
+  --color-blocked-soft: var(--blocked-soft);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.figures {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}

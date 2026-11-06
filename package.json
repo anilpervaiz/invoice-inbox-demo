@@ -1,0 +1,39 @@
+{
+  "name": "invoice-inbox-demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "pdfs": "tsx scripts/make-pdfs.ts",
+    "samples": "tsx scripts/build-samples.ts",
+    "eval": "tsx scripts/eval.ts",
+    "check:release": "tsx scripts/check-release.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^4.0.112",
+    "ai": "^7.0.163",
+    "next": "16.4.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "unpdf": "^2.1.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^24.19.2",
+    "@types/pdfkit": "^0.17.7",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.5",
+    "pdfkit": "^0.20.2",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.1.0"
+  }
+}
