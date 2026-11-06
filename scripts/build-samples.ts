@@ -1,10 +1,14 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { aiConfigured, readWithAi } from "../lib/ai-reader";
 import { processInvoice } from "../lib/decide";
 import { RULE_CONTEXT } from "../lib/demo-data";
 import { readWithText } from "../lib/text-reader";
 import type { ReadResult } from "../lib/types";
 import { SAMPLES } from "./invoice-specs";
+
+if (existsSync(".env.local")) {
+  process.loadEnvFile(".env.local");
+}
 
 // --simulate-ai copies the known answers in as the AI read, so the screens can be tested without a key.
 // The page shows a warning when this is on, and `npm run check:release` refuses to pass.
@@ -21,8 +25,16 @@ async function main() {
       : await readWithAi(data.slice());
     invoices.push({ ...processInvoice(s.id, `${s.id}.pdf`, text, ai, RULE_CONTEXT), title: s.title });
     const last = invoices[invoices.length - 1];
-    console.log(s.id.padEnd(14), `expected ${s.expected.route}`.padEnd(18), `got ${last.decision.route}`, ai.note ? `(${ai.note})` : "");
+    console.log(
+      s.id.padEnd(14),
+      `expected ${s.expected.route}`.padEnd(18),
+      `got ${last.decision.route}`,
+      ai.note ? `(${ai.note})` : "",
+    );
   }
-  writeFileSync("data/samples.json", JSON.stringify({ simulated: simulate, aiRun: !simulate && aiConfigured(), invoices }, null, 2));
+  writeFileSync(
+    "data/samples.json",
+    JSON.stringify({ simulated: simulate, aiRun: !simulate && aiConfigured(), invoices }, null, 2),
+  );
 }
 main();

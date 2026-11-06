@@ -229,7 +229,7 @@ describe("Stage 1 - Task 3: upload safety checks", () => {
     expect(body1.error).toContain("Only PDF files work here");
 
     // 2. 50-page PDF refused with 400
-    const fiftyPageBytes = await new Promise<Uint8Array>((resolve, reject) => {
+    const fiftyPageBytes = await new Promise<Uint8Array<ArrayBuffer>>((resolve, reject) => {
       const doc = new PDFDocument();
       const chunks: Buffer[] = [];
       doc.on("data", (c) => chunks.push(c));

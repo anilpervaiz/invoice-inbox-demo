@@ -19,8 +19,8 @@ export type SampleInvoice = ProcessedInvoice & { title?: string };
 type SetStats = {
   invoices: number;
   scans: number;
-  text: { accuracy: number | null; fieldsChecked: number };
-  ai: { accuracy: number | null; fieldsChecked: number } | null;
+  text: { right?: number; accuracy: number | null; fieldsChecked: number };
+  ai: { right?: number; accuracy: number | null; fieldsChecked: number } | null;
   falseClears?: number;
   plantedErrors: { caught: number; total: number; notRead: number };
   cleanInvoices?: { cleared: number; sentToPerson: number; total: number } | null;
@@ -444,16 +444,20 @@ export function Inbox({
               const totalCount =
                 (report.known?.invoices ?? 0) + (report.heldout?.invoices ?? 0) || report.invoices || 0;
               const target = report.heldout ?? report.known;
+              const setInvoices = target?.invoices ?? totalCount;
+              const setLabel = report.heldout ? "held-out generated invoices" : "generated invoices";
               const textStats = target?.text ?? report.text;
               const aiStats = target?.ai ?? report.ai;
               const textRight =
-                textStats && textStats.accuracy !== null
+                (target?.text.right ?? undefined) ??
+                (textStats && textStats.accuracy !== null
                   ? Math.round((textStats.accuracy * textStats.fieldsChecked) / 100)
-                  : 0;
+                  : 0);
               const aiRight =
-                aiStats && aiStats.accuracy !== null
+                (target?.ai?.right ?? undefined) ??
+                (aiStats && aiStats.accuracy !== null
                   ? Math.round((aiStats.accuracy * aiStats.fieldsChecked) / 100)
-                  : 0;
+                  : 0);
               const plantedCaught =
                 (report.known?.plantedErrors.caught ?? 0) + (report.heldout?.plantedErrors.caught ?? 0) ||
                 report.plantedErrors?.caught ||
@@ -462,6 +466,9 @@ export function Inbox({
                 (report.known?.plantedErrors.total ?? 0) + (report.heldout?.plantedErrors.total ?? 0) ||
                 report.plantedErrors?.total ||
                 0;
+              const falseClears =
+                report.totalFalseClears ??
+                ((report.known?.falseClears ?? 0) + (report.heldout?.falseClears ?? 0));
 
               return (
                 <>
@@ -470,28 +477,29 @@ export function Inbox({
                     {report.heldout ? ` (${report.heldout.invoices} held-out)` : ""}
                   </h2>
                   <p className="mt-1 text-xs text-muted">
-                    {report.model ? `Model: ${report.model}` : "Plain-code mode"} · Evaluated {report.runAt}
+                    {report.model ? `Model: ${report.model}` : "Plain-code mode (AI not yet run)"} · Evaluated{" "}
+                    {report.runAt}
                   </p>
                   {aiStats && aiStats.accuracy !== null ? (
                     <p className="mt-1.5 text-muted">
-                      AI read {aiRight} of {aiStats.fieldsChecked} fields ({aiStats.accuracy}%) correctly on{" "}
-                      {report.heldout?.invoices ?? totalCount} invoices. Checks caught {plantedCaught} of {plantedTotal}{" "}
-                      planted errors with 0 false clears.
+                      AI read {aiRight} of {aiStats.fieldsChecked} fields ({aiStats.accuracy}%) on {setInvoices}{" "}
+                      {setLabel}. Checks caught {plantedCaught} of {plantedTotal} planted errors across all{" "}
+                      {totalCount} invoices, with {falseClears} false clears.
                     </p>
                   ) : textStats ? (
                     <p className="mt-1.5 text-muted">
-                      Plain-code reader parsed {textRight} of {textStats.fieldsChecked} fields ({textStats.accuracy}%) on{" "}
-                      {report.heldout?.invoices ?? totalCount} invoices. Checks caught {plantedCaught} of {plantedTotal}{" "}
-                      planted errors with 0 false clears.
+                      Plain-code reader read {textRight} of {textStats.fieldsChecked} fields ({textStats.accuracy}%) on{" "}
+                      {setInvoices} {setLabel}. Checks caught {plantedCaught} of {plantedTotal} planted errors across
+                      all {totalCount} invoices, with {falseClears} false clears.
                     </p>
                   ) : (
                     <p className="mt-1.5 text-muted">
-                      Checks caught {plantedCaught} of {plantedTotal} planted errors. AI accuracy hasn&apos;t been
-                      measured yet.
+                      Checks caught {plantedCaught} of {plantedTotal} planted errors across {totalCount} generated
+                      invoices. AI accuracy hasn&apos;t been measured yet.
                     </p>
                   )}
                   <p className="mt-1 text-[11px] text-muted/80">
-                    Real invoices will score lower. Zero false clears is the hard safety constraint.
+                    Real invoices will score lower than generated ones. Zero false clears is the hard safety rule.
                   </p>
                 </>
               );

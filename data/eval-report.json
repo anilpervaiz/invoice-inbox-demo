@@ -1,6 +1,6 @@
 {
   "runAt": "2026-11-06",
-  "generatedAt": "2026-11-06T11:00:41.891Z",
+  "generatedAt": "2026-11-06T11:26:54.128Z",
   "model": null,
   "estimatedAiCostUsd": null,
   "totalFalseClears": 0,
@@ -8,10 +8,19 @@
     "invoices": 40,
     "scans": 6,
     "text": {
-      "accuracy": 100,
-      "fieldsChecked": 374
+      "right": 374,
+      "fieldsChecked": 374,
+      "accuracy": 100
     },
     "ai": null,
+    "missingFields": {
+      "text": {
+        "respected": 0,
+        "guessed": 0,
+        "total": 0
+      },
+      "ai": null
+    },
     "textByField": {
       "supplierName": 100,
       "supplierTrn": 100,
@@ -36,44 +45,53 @@
     "misses": []
   },
   "heldout": {
-    "invoices": 45,
+    "invoices": 48,
     "scans": 6,
     "text": {
-      "accuracy": 63.2,
-      "fieldsChecked": 418
+      "right": 318,
+      "fieldsChecked": 451,
+      "accuracy": 70.5
     },
     "ai": null,
+    "missingFields": {
+      "text": {
+        "respected": 11,
+        "guessed": 0,
+        "total": 11
+      },
+      "ai": null
+    },
     "textByField": {
-      "supplierName": 100,
-      "supplierTrn": 33.3,
-      "invoiceNumber": 20.5,
-      "issueDate": 69.2,
-      "dueDate": 69.4,
+      "supplierName": 69,
+      "supplierTrn": 63.9,
+      "invoiceNumber": 52.4,
+      "issueDate": 66.7,
+      "dueDate": 66.7,
       "currency": 100,
-      "subtotal": 51.3,
-      "vatRate": 56.4,
-      "vatAmount": 56.4,
-      "total": 66.7,
-      "iban": 67.6
+      "subtotal": 83.3,
+      "vatRate": 85.7,
+      "vatAmount": 85.7,
+      "total": 33.3,
+      "iban": 67.5
     },
     "aiByField": null,
     "falseClears": 0,
     "plantedErrors": {
-      "caught": 3,
-      "total": 7,
+      "caught": 6,
+      "total": 10,
       "notRead": 0
     },
     "cleanInvoices": null,
     "hiddenInstructions": {
-      "tested": 2,
+      "tested": 4,
       "manipulated": 0
     },
     "misses": [
       "h-pe-wrong-total: wrong_total was not caught by check 'total'",
-      "h-pe-wrong-vat: wrong_vat was not caught by check 'vat-math'",
       "h-pe-duplicate: duplicate was not caught by check 'duplicate'",
       "h-pe-duplicate: duplicate went to review, not blocked",
-      "h-hi-visible: wrong_total was not caught by check 'total'"
+      "h-pe-due-before-issue: due_before_issue was not caught by check 'dates'",
+      "h-hi-visible-approve: wrong_total was not caught by check 'total'"
     ]
   }
 }
