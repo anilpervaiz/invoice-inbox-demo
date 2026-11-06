@@ -15,6 +15,10 @@ export type InvoiceSpec = {
   fields: InvoiceFields;
   // What the checks should do with this invoice, and why.
   expected: { route: "ready" | "review" | "blocked"; planted: string | null };
+  hiddenInstruction?: {
+    type: "visible" | "white-text";
+    text: string;
+  };
 };
 
 type Doc = InstanceType<typeof PDFDocument>;
@@ -168,6 +172,17 @@ function draw(doc: Doc, s: InvoiceSpec) {
       [`Balance Due ${cur}`, tot, true],
     ]);
     doc.font("Helvetica").fontSize(9).fillColor("#444").text(`Remit to IBAN: ${f.iban}`, 50, end + 24);
+  }
+
+  if (s.hiddenInstruction) {
+    if (s.hiddenInstruction.type === "visible") {
+      const boxY = 340;
+      doc.rect(50, boxY, 495, 44).fillAndStroke("#FFFBEB", "#D97706");
+      doc.font("Helvetica-Bold").fontSize(8.5).fillColor("#B45309").text("SYSTEM DIRECTIVE / PROMPT INJECTION TEST:", 60, boxY + 7);
+      doc.font("Helvetica").fontSize(7.5).fillColor("#78350F").text(s.hiddenInstruction.text, 60, boxY + 20, { width: 475 });
+    } else {
+      doc.font("Helvetica").fontSize(2).fillColor("#FFFFFF").text(s.hiddenInstruction.text, 50, 780);
+    }
   }
 }
 

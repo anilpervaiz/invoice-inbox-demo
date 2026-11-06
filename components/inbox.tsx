@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { toCsv } from "@/lib/csv";
+import { toCsv, toQuickBooksCsv, toXeroCsv, type ExportRow } from "@/lib/csv";
 import { formatMoney } from "@/lib/rules";
 import {
   FIELD_LABELS,
@@ -43,8 +43,33 @@ type Report = {
   cleanInvoicesCleared?: { cleared: number; total: number } | null;
 };
 
-type Outcome = { result: "approved" | "held"; fields: InvoiceFields };
+type Outcome = {
+  result: "approved" | "held";
+  fields: InvoiceFields;
+  personChoice: string;
+  routeReason: string;
+  originalRoute: Route;
+};
 type Stored = Record<string, Outcome>;
+
+export function getRouteReason(invoice: SampleInvoice): string {
+  const d = invoice.decision;
+  if (d.route === "ready") {
+    return "Ready to post: both reads agree and all 9 checks pass.";
+  }
+  const failedCheck = invoice.checks.find((c) => c.status === "fail");
+  if (failedCheck) {
+    return `${d.headline}: ${failedCheck.detail}`;
+  }
+  const conflict = invoice.views.find((v) => v.agreement === "conflict");
+  if (conflict) {
+    return `${d.headline}: reads disagree on ${FIELD_LABELS[conflict.field].toLowerCase()}.`;
+  }
+  if (invoice.reads.text !== "ok" || invoice.reads.ai !== "ok") {
+    return `${d.headline}: single read only (requires human verification).`;
+  }
+  return d.headline;
+}
 
 const STORE_KEY = "invoice-inbox-outcomes";
 
@@ -183,10 +208,20 @@ export function Inbox({
   const outcome = selected ? outcomes[selected.id] : undefined;
   const open = items.filter((i) => !outcomes[i.id]);
   const done = items.filter((i) => outcomes[i.id]);
-  const approved = useMemo(
-    () => Object.values(outcomes).filter((o) => o.result === "approved").map((o) => o.fields),
+  const approvedRows = useMemo<ExportRow[]>(
+    () =>
+      Object.values(outcomes)
+        .filter((o) => o.result === "approved")
+        .map((o) => ({
+          fields: o.fields,
+          routeReason: o.routeReason,
+          personChoice: o.personChoice,
+          originalRoute: o.originalRoute,
+        })),
     [outcomes],
   );
+
+  const [exportFormat, setExportFormat] = useState<"audit" | "xero" | "qbo">("audit");
 
   const settle = (invoice: SampleInvoice, option: QuestionOption) => {
     const next: Stored = {
@@ -194,6 +229,9 @@ export function Inbox({
       [invoice.id]: {
         result: option.outcome === "approve" ? "approved" : "held",
         fields: { ...invoice.fields, ...option.set },
+        personChoice: option.label,
+        routeReason: getRouteReason(invoice),
+        originalRoute: invoice.decision.route,
       },
     };
     setOutcomes(next);
@@ -209,12 +247,34 @@ export function Inbox({
   };
 
   const exportCsv = () => {
-    const url = URL.createObjectURL(new Blob([toCsv(approved)], { type: "text/csv" }));
+    let content = "";
+    let filename = "";
+    if (exportFormat === "xero") {
+      content = toXeroCsv(approvedRows);
+      filename = "approved-invoices-xero.csv";
+    } else if (exportFormat === "qbo") {
+      content = toQuickBooksCsv(approvedRows);
+      filename = "approved-invoices-qbo.csv";
+    } else {
+      content = toCsv(approvedRows);
+      filename = "approved-invoices-audit.csv";
+    }
+    const url = URL.createObjectURL(new Blob([content], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a");
     link.href = url;
-    link.download = "approved-invoices.csv";
+    link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleNavKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    e.preventDefault();
+    const currentIdx = items.findIndex((i) => i.id === selectedId);
+    if (currentIdx === -1) return;
+    const nextIdx =
+      e.key === "ArrowDown" ? (currentIdx + 1) % items.length : (currentIdx - 1 + items.length) % items.length;
+    openInvoice(items[nextIdx].id);
   };
 
   const upload = async (file: File) => {
@@ -249,7 +309,9 @@ export function Inbox({
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-rule bg-sheet px-4 py-3 sm:px-5">
         <div>
           <h1 className="text-[15px] font-semibold tracking-tight">Invoice Inbox</h1>
-          <p className="text-xs text-muted">Harbourline Accounting · client: Juniper Street Trading</p>
+          <p className="text-xs text-muted">
+            Two independent reads verified by plain rules. AI never decides. · Demo client: Juniper Street Trading LLC
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {canUpload && (
@@ -277,13 +339,25 @@ export function Inbox({
               </button>
             </>
           )}
-          <button
-            onClick={exportCsv}
-            disabled={!approved.length}
-            className="rounded bg-ink px-3 py-1.5 text-sm text-sheet disabled:opacity-35"
-          >
-            Export approved ({approved.length})
-          </button>
+          <div className="flex items-center gap-1.5">
+            <select
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value as "audit" | "xero" | "qbo")}
+              aria-label="Export format"
+              className="rounded border border-rule bg-sheet px-2 py-1.5 text-xs text-ink"
+            >
+              <option value="audit">Plain CSV (Audit)</option>
+              <option value="xero">Xero Bills</option>
+              <option value="qbo">QuickBooks Online</option>
+            </select>
+            <button
+              onClick={exportCsv}
+              disabled={!approvedRows.length}
+              className="rounded bg-ink px-3 py-1.5 text-sm text-sheet disabled:opacity-35"
+            >
+              Export approved ({approvedRows.length})
+            </button>
+          </div>
         </div>
       </header>
 
@@ -317,7 +391,7 @@ export function Inbox({
       )}
 
       <main className="grid flex-1 grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_400px]">
-        <nav aria-label="Invoices" className="min-w-0 border-b border-rule lg:border-r lg:border-b-0">
+        <nav aria-label="Invoices" onKeyDown={handleNavKeyDown} className="min-w-0 border-b border-rule lg:border-r lg:border-b-0">
           {GROUPS.map((g) => {
             const list = open.filter((i) => i.decision.route === g.route);
             if (!list.length) return null;
@@ -374,14 +448,20 @@ export function Inbox({
                 <p className="text-base font-semibold">{outcome.result === "approved" ? "Approved" : "Held"}</p>
                 <p className="mt-1 text-sm text-muted">
                   {outcome.result === "approved"
-                    ? "This one will be in your CSV export."
-                    : "This one won't be posted. Nothing was exported."}
+                    ? `Settled as "${outcome.personChoice}". Included in your CSV export.`
+                    : `Settled as "${outcome.personChoice}". This invoice will not be posted.`}
+                </p>
+                <p className="mt-2 text-xs text-muted">
+                  <span className="font-medium text-ink/80">Route reason:</span> {outcome.routeReason}
                 </p>
               </>
             ) : (
               <>
                 <p className="text-base font-semibold">{decision.headline}</p>
                 {decision.question && <p className="mt-1.5 text-sm leading-relaxed">{decision.question}</p>}
+                <p className="mt-2 text-xs text-muted">
+                  <span className="font-medium text-ink/80">Route reason:</span> {getRouteReason(selected)}
+                </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {decision.options.map((option, index) => (
                     <button

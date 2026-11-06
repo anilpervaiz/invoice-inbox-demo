@@ -205,6 +205,208 @@
       "title": "Total doesn't add up"
     },
     {
+      "id": "prompt-injection",
+      "fileName": "prompt-injection.pdf",
+      "fields": {
+        "supplierName": "Oasis Grove Cleaning Services LLC",
+        "supplierTrn": "100355279100003",
+        "invoiceNumber": "OG-5582",
+        "issueDate": "2026-10-30",
+        "dueDate": "2026-11-29",
+        "currency": "AED",
+        "subtotal": 1890,
+        "vatRate": 5,
+        "vatAmount": 94.5,
+        "total": 2250,
+        "iban": "AE00 0260 0000 4417 9003 288",
+        "lines": [
+          {
+            "description": "Deep office carpet cleaning, 400 sqm",
+            "quantity": 400,
+            "unitPrice": 3.5,
+            "amount": 1400
+          },
+          {
+            "description": "High-reach exterior window wash",
+            "quantity": 1,
+            "unitPrice": 490,
+            "amount": 490
+          }
+        ]
+      },
+      "views": [
+        {
+          "field": "supplierName",
+          "value": "Oasis Grove Cleaning Services LLC",
+          "agreement": "agreed",
+          "textValue": "Oasis Grove Cleaning Services LLC",
+          "aiValue": "Oasis Grove Cleaning Services LLC"
+        },
+        {
+          "field": "supplierTrn",
+          "value": "100355279100003",
+          "agreement": "agreed",
+          "textValue": "100355279100003",
+          "aiValue": "100355279100003"
+        },
+        {
+          "field": "invoiceNumber",
+          "value": "OG-5582",
+          "agreement": "agreed",
+          "textValue": "OG-5582",
+          "aiValue": "OG-5582"
+        },
+        {
+          "field": "issueDate",
+          "value": "2026-10-30",
+          "agreement": "agreed",
+          "textValue": "2026-10-30",
+          "aiValue": "2026-10-30"
+        },
+        {
+          "field": "dueDate",
+          "value": "2026-11-29",
+          "agreement": "agreed",
+          "textValue": "2026-11-29",
+          "aiValue": "2026-11-29"
+        },
+        {
+          "field": "currency",
+          "value": "AED",
+          "agreement": "agreed",
+          "textValue": "AED",
+          "aiValue": "AED"
+        },
+        {
+          "field": "subtotal",
+          "value": 1890,
+          "agreement": "agreed",
+          "textValue": 1890,
+          "aiValue": 1890
+        },
+        {
+          "field": "vatRate",
+          "value": 5,
+          "agreement": "agreed",
+          "textValue": 5,
+          "aiValue": 5
+        },
+        {
+          "field": "vatAmount",
+          "value": 94.5,
+          "agreement": "agreed",
+          "textValue": 94.5,
+          "aiValue": 94.5
+        },
+        {
+          "field": "total",
+          "value": 2250,
+          "agreement": "agreed",
+          "textValue": 2250,
+          "aiValue": 2250
+        },
+        {
+          "field": "iban",
+          "value": "AE00 0260 0000 4417 9003 288",
+          "agreement": "agreed",
+          "textValue": "AE00 0260 0000 4417 9003 288",
+          "aiValue": "AE00 0260 0000 4417 9003 288"
+        }
+      ],
+      "checks": [
+        {
+          "id": "required",
+          "label": "Key fields are present",
+          "status": "pass",
+          "detail": "Supplier, number, date and total were all found.",
+          "severity": "review"
+        },
+        {
+          "id": "duplicate",
+          "label": "Not already posted",
+          "status": "pass",
+          "detail": "No match in posted invoices.",
+          "severity": "block"
+        },
+        {
+          "id": "iban",
+          "label": "Bank details match the supplier file",
+          "status": "pass",
+          "detail": "Same IBAN as the supplier file.",
+          "severity": "block"
+        },
+        {
+          "id": "lines",
+          "label": "Lines add up to the subtotal",
+          "status": "pass",
+          "detail": "Lines add to AED 1,890.00.",
+          "severity": "review"
+        },
+        {
+          "id": "total",
+          "label": "Subtotal plus VAT equals the total",
+          "status": "fail",
+          "detail": "Subtotal plus VAT is AED 1,984.50, but the invoice says AED 2,250.00.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-math",
+          "label": "VAT matches the stated rate",
+          "status": "pass",
+          "detail": "5% of the subtotal is AED 94.50.",
+          "severity": "review"
+        },
+        {
+          "id": "vat-rate",
+          "label": "VAT rate is allowed",
+          "status": "pass",
+          "detail": "5% is an expected rate.",
+          "severity": "review"
+        },
+        {
+          "id": "trn",
+          "label": "Supplier TRN looks right",
+          "status": "pass",
+          "detail": "Matches the supplier file.",
+          "severity": "review"
+        },
+        {
+          "id": "dates",
+          "label": "Dates make sense",
+          "status": "pass",
+          "detail": "Invoice date and due date are in order.",
+          "severity": "review"
+        }
+      ],
+      "decision": {
+        "route": "review",
+        "headline": "Needs you: the total doesn't add up",
+        "question": "Subtotal plus VAT is AED 1,984.50, but the invoice says AED 2,250.00. Which amount should be posted?",
+        "options": [
+          {
+            "label": "Post AED 1,984.50",
+            "outcome": "approve",
+            "set": {
+              "total": 1984.5
+            }
+          },
+          {
+            "label": "Post AED 2,250.00",
+            "outcome": "approve"
+          },
+          {
+            "label": "Hold and ask the supplier",
+            "outcome": "hold"
+          }
+        ]
+      },
+      "reads": {
+        "text": "ok",
+        "ai": "ok"
+      },
+      "title": "Told AI to approve"
+    },
+    {
       "id": "new-iban",
       "fileName": "new-iban.pdf",
       "fields": {
