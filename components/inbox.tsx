@@ -59,14 +59,35 @@ export function getRouteReason(invoice: SampleInvoice): string {
   }
   const failedCheck = invoice.checks.find((c) => c.status === "fail");
   if (failedCheck) {
-    return `${d.headline}: ${failedCheck.detail}`;
+    return `Failed check "${failedCheck.label}" — ${failedCheck.detail}`;
   }
   const conflict = invoice.views.find((v) => v.agreement === "conflict");
   if (conflict) {
-    return `${d.headline}: reads disagree on ${FIELD_LABELS[conflict.field].toLowerCase()}.`;
+    return `Reads disagree on ${FIELD_LABELS[conflict.field].toLowerCase()} (Code vs. AI).`;
   }
   if (invoice.reads.text !== "ok" || invoice.reads.ai !== "ok") {
-    return `${d.headline}: single read only (requires human verification).`;
+    return `Single read only (${invoice.reads.text === "ok" ? "Code reader" : "AI reader"} only — requires human verification).`;
+  }
+  return d.headline;
+}
+
+function getCompactRouteTrace(invoice: SampleInvoice): string {
+  const d = invoice.decision;
+  const passedCount = invoice.checks.filter((c) => c.status === "pass").length;
+  const totalChecks = invoice.checks.length;
+  if (d.route === "ready") {
+    return `Both readers (Code + AI) agreed on every field and all ${totalChecks} deterministic checks passed.`;
+  }
+  const failedCheck = invoice.checks.find((c) => c.status === "fail");
+  if (failedCheck) {
+    return `Rule "${failedCheck.label}" failed (${passedCount} of ${totalChecks} checks passed · AI never decides).`;
+  }
+  const conflict = invoice.views.find((v) => v.agreement === "conflict");
+  if (conflict) {
+    return `Code and AI readers disagreed on ${FIELD_LABELS[conflict.field].toLowerCase()} (${passedCount} of ${totalChecks} checks passed).`;
+  }
+  if (invoice.reads.text !== "ok" || invoice.reads.ai !== "ok") {
+    return `Single read only (${invoice.reads.text === "ok" ? "Code reader" : "AI reader"} succeeded; nothing clears on 1 read).`;
   }
   return d.headline;
 }
@@ -88,16 +109,54 @@ const save = (value: Stored) => {
   }
 };
 
-const GROUPS: { route: Route; title: string; text: string; dot: string }[] = [
-  { route: "review", title: "Needs you", text: "text-review", dot: "bg-review" },
-  { route: "blocked", title: "Blocked", text: "text-blocked", dot: "bg-blocked" },
-  { route: "ready", title: "Ready to post", text: "text-ready", dot: "bg-ready" },
+const GROUPS: { route: Route; title: string; text: string; dot: string; activeBorder: string; badge: string }[] = [
+  {
+    route: "review",
+    title: "Needs you",
+    text: "text-review",
+    dot: "bg-review",
+    activeBorder: "border-review",
+    badge: "bg-review-soft text-review border-review/25",
+  },
+  {
+    route: "blocked",
+    title: "Blocked",
+    text: "text-blocked",
+    dot: "bg-blocked",
+    activeBorder: "border-blocked",
+    badge: "bg-blocked-soft text-blocked border-blocked/25",
+  },
+  {
+    route: "ready",
+    title: "Ready to post",
+    text: "text-ready",
+    dot: "bg-ready",
+    activeBorder: "border-ready",
+    badge: "bg-ready-soft text-ready border-ready/25",
+  },
 ];
 
 const CARD: Record<Route, string> = {
   review: "bg-review-soft border-review/30",
   blocked: "bg-blocked-soft border-blocked/30",
   ready: "bg-ready-soft border-ready/30",
+};
+
+const ROUTE_ACCENT: Record<Route, string> = {
+  review: "border-l-review",
+  blocked: "border-l-blocked",
+  ready: "border-l-ready",
+};
+
+const FIELD_CHECK_MAP: Partial<Record<FieldView["field"], string>> = {
+  subtotal: "lines",
+  total: "total",
+  vatAmount: "vat-math",
+  vatRate: "vat-rate",
+  supplierTrn: "trn",
+  iban: "iban",
+  invoiceNumber: "duplicate",
+  issueDate: "dates",
 };
 
 function Row({
@@ -112,52 +171,103 @@ function Row({
   onSelect: () => void;
 }) {
   const f = outcome?.fields ?? invoice.fields;
+  const route = invoice.decision.route;
   return (
     <button
       onClick={onSelect}
       aria-current={selected}
-      className={`w-full border-l-2 px-4 py-3 text-left transition-colors ${
-        selected ? "border-ink bg-sheet" : "border-transparent hover:bg-sheet/60"
+      className={`w-full border-b border-rule/60 border-l-[3px] px-4 py-3 text-left transition-colors ${
+        selected
+          ? `${ROUTE_ACCENT[route]} bg-sheet shadow-[inset_0_1px_0_0_rgba(0,0,0,0.03)]`
+          : "border-l-transparent hover:bg-sheet/70"
       }`}
     >
-      <span className="flex min-w-0 items-baseline justify-between gap-3">
-        <span className="truncate text-sm font-medium">{f.supplierName ?? invoice.fileName}</span>
-        <span className="figures shrink-0 text-xs">{f.total === null ? "" : formatMoney(f.total)}</span>
+      <span className="flex min-w-0 items-baseline justify-between gap-2">
+        <span className={`truncate text-sm ${selected ? "font-semibold text-ink" : "font-medium text-ink/90"}`}>
+          {f.supplierName ?? invoice.fileName}
+        </span>
+        <span className="figures shrink-0 text-xs font-medium text-ink">
+          {f.total === null ? "" : formatMoney(f.total)}
+        </span>
       </span>
-      <span className="mt-0.5 flex min-w-0 justify-between gap-3 text-xs text-muted">
+      <span className="mt-1 flex min-w-0 items-center justify-between gap-2 text-xs text-muted">
         <span className="truncate">{invoice.title ?? invoice.fileName}</span>
-        <span className="figures shrink-0">{f.currency}</span>
+        <span className="figures shrink-0 text-[11px]">{f.currency}</span>
       </span>
     </button>
   );
 }
 
+function rawValueText(val: string | number | null, field: FieldView["field"], currency: string | null) {
+  if (val === null) return "Not found";
+  if (MONEY_FIELDS.includes(field) && typeof val === "number") return formatMoney(val, currency);
+  if (field === "vatRate") return `${val}%`;
+  return String(val);
+}
+
 function fieldText(v: FieldView, currency: string | null) {
-  if (v.value === null) return "Not found";
-  if (MONEY_FIELDS.includes(v.field) && typeof v.value === "number") return formatMoney(v.value, currency);
-  if (v.field === "vatRate") return `${v.value}%`;
-  return String(v.value);
+  return rawValueText(v.value, v.field, currency);
 }
 
 const AGREEMENT = {
-  agreed: { label: "Both reads agree", mark: "✓✓", tone: "text-ready" },
-  single: { label: "One read only", mark: "✓", tone: "text-muted" },
-  conflict: { label: "Reads disagree", mark: "≠", tone: "text-review" },
-  missing: { label: "Not found", mark: "–", tone: "text-muted" },
+  agreed: {
+    label: "Both reads agree",
+    shortLabel: "Code + AI",
+    mark: "✓✓",
+    tone: "text-ready",
+    pill: "bg-ready-soft text-ready border-ready/25",
+  },
+  single: {
+    label: "One read only",
+    shortLabel: "1 reader",
+    mark: "✓",
+    tone: "text-review",
+    pill: "bg-review-soft/70 text-review border-review/25",
+  },
+  conflict: {
+    label: "Reads disagree",
+    shortLabel: "Mismatch",
+    mark: "≠",
+    tone: "text-review",
+    pill: "bg-review-soft text-review border-review/40 font-semibold",
+  },
+  missing: {
+    label: "Not found",
+    shortLabel: "Missing",
+    mark: "–",
+    tone: "text-muted",
+    pill: "bg-desk text-muted border-rule",
+  },
 };
 
 function CheckRow({ check }: { check: Check }) {
   const mark = check.status === "pass" ? "✓" : check.status === "fail" ? "✕" : "–";
-  const tone = check.status === "pass" ? "text-ready" : check.status === "fail" ? "text-blocked" : "text-muted";
+  const tone =
+    check.status === "pass"
+      ? "bg-ready-soft text-ready"
+      : check.status === "fail"
+        ? "bg-blocked-soft text-blocked font-semibold"
+        : "bg-desk text-muted";
   return (
-    <li className="flex gap-2.5 py-1.5 text-sm">
-      <span aria-hidden className={`figures w-3 shrink-0 ${tone}`}>
+    <li
+      className={`flex items-start gap-2.5 rounded px-2 py-1.5 text-sm ${
+        check.status === "fail" ? "bg-blocked-soft/45" : ""
+      }`}
+    >
+      <span
+        aria-hidden
+        className={`figures mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded text-[11px] ${tone}`}
+      >
         {mark}
       </span>
-      <span>
-        <span className={check.status === "fail" ? "font-medium" : ""}>{check.label}</span>
+      <span className="min-w-0 flex-1">
+        <span className={check.status === "fail" ? "font-semibold text-ink" : "text-ink/90"}>{check.label}</span>
         <span className="sr-only"> ({check.status})</span>
-        {check.status !== "pass" && <span className="block text-xs text-muted">{check.detail}</span>}
+        {check.status !== "pass" && (
+          <span className={`mt-0.5 block text-xs ${check.status === "fail" ? "text-blocked" : "text-muted"}`}>
+            {check.detail}
+          </span>
+        )}
       </span>
     </li>
   );
@@ -305,15 +415,21 @@ export function Inbox({
   const previewUrl = uploads[selected.id];
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col overflow-x-hidden">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-rule bg-sheet px-4 py-3 sm:px-5">
-        <div>
-          <h1 className="text-[15px] font-semibold tracking-tight">Invoice Inbox</h1>
-          <p className="text-xs text-muted">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-base font-semibold tracking-tight text-ink">Invoice Inbox</h1>
+            <span className="rounded border border-ready/30 bg-ready-soft px-2 py-0.5 text-[11px] font-medium text-ready">
+              {report.totalFalseClears ?? 0} false clears ·{" "}
+              {(report.known?.invoices ?? 0) + (report.heldout?.invoices ?? 0) || report.invoices || 88} test invoices
+            </span>
+          </div>
+          <p className="mt-0.5 text-xs text-muted">
             Two independent reads verified by plain rules. AI never decides. · Demo client: Juniper Street Trading LLC
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           {canUpload && (
             <>
               <input
@@ -333,13 +449,13 @@ export function Inbox({
                 onClick={() => fileInput.current?.click()}
                 disabled={busy}
                 aria-describedby="upload-privacy-notice"
-                className="rounded border border-rule px-3 py-1.5 text-sm hover:bg-paper disabled:opacity-50"
+                className="rounded border border-rule bg-paper px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-desk disabled:opacity-50 sm:text-sm"
               >
                 {busy ? "Reading…" : "Try your own PDF"}
               </button>
             </>
           )}
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             <select
               value={exportFormat}
               onChange={(e) => setExportFormat(e.target.value as "audit" | "xero" | "qbo")}
@@ -353,7 +469,7 @@ export function Inbox({
             <button
               onClick={exportCsv}
               disabled={!approvedRows.length}
-              className="rounded bg-ink px-3 py-1.5 text-sm text-sheet disabled:opacity-35"
+              className="rounded bg-ink px-3 py-1.5 text-xs font-medium text-sheet transition-opacity disabled:opacity-35 sm:text-sm"
             >
               Export approved ({approvedRows.length})
             </button>
@@ -361,20 +477,25 @@ export function Inbox({
         </div>
       </header>
 
-      <div id="upload-privacy-notice" className="border-b border-rule bg-desk px-4 py-2 text-xs text-muted sm:px-5">
-        <p>
+      <div
+        id="upload-privacy-notice"
+        className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-rule bg-desk/75 px-4 py-1.5 text-[11px] leading-snug text-muted sm:px-5"
+      >
+        <p className="min-w-0">
+          <span className="mr-1.5 inline-block rounded bg-ink/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-ink uppercase">
+            Demo
+          </span>
           Demo by{" "}
-          <a href="https://anilpervaiz.com" className="underline">
+          <a href="https://anilpervaiz.com" className="font-medium text-ink underline">
             Anil Pervaiz
           </a>
-          . Every company and invoice here is made up. <strong>Please don&apos;t upload real invoices.</strong>
+          . Every company and invoice here is made up. <strong className="text-ink">Please don&apos;t upload real invoices.</strong>
         </p>
         {canUpload && (
-          <p className="mt-1 text-[11px] leading-relaxed text-muted/90">
-            Uploaded PDFs are processed in memory and never saved to a database or disk by this site. When AI is enabled,
-            the PDF is sent to Google&apos;s Gemini API for extraction. On billed API keys, Google does not train on your
-            data and logs requests temporarily only for abuse prevention; on free-tier keys, Google terms allow data to
-            be used for model improvement and human review. Do not upload confidential, personal, or financial documents.
+          <p className="min-w-0 text-[11px] text-muted/90">
+            Uploaded PDFs are processed in memory and never saved to disk or a database. When AI is enabled, the PDF is
+            sent to Google&apos;s Gemini API (billed keys do not train on data; free-tier terms allow review — no
+            confidential files).
           </p>
         )}
       </div>
@@ -390,16 +511,23 @@ export function Inbox({
         </p>
       )}
 
-      <main className="grid flex-1 grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_400px]">
-        <nav aria-label="Invoices" onKeyDown={handleNavKeyDown} className="min-w-0 border-b border-rule lg:border-r lg:border-b-0">
+      <main className="grid flex-1 grid-cols-1 lg:grid-cols-[290px_minmax(0,1fr)_420px]">
+        <nav
+          aria-label="Invoices"
+          onKeyDown={handleNavKeyDown}
+          className="min-w-0 border-b border-rule bg-paper pb-10 lg:border-r lg:border-b-0"
+        >
           {GROUPS.map((g) => {
             const list = open.filter((i) => i.decision.route === g.route);
             if (!list.length) return null;
             return (
               <section key={g.route}>
-                <h2 className={`flex items-center gap-2 px-4 pt-4 pb-1 text-xs font-semibold ${g.text}`}>
-                  <span aria-hidden className={`size-1.5 rounded-full ${g.dot}`} />
-                  {g.title} ({list.length})
+                <h2 className={`flex items-center justify-between border-b border-rule/60 px-4 pt-3.5 pb-1.5 text-xs font-semibold ${g.text}`}>
+                  <span className="flex items-center gap-2">
+                    <span aria-hidden className={`size-2 rounded-full ${g.dot}`} />
+                    {g.title}
+                  </span>
+                  <span className={`figures rounded border px-1.5 py-0.5 text-[10px] ${g.badge}`}>{list.length}</span>
                 </h2>
                 {list.map((i) => (
                   <Row key={i.id} invoice={i} selected={i.id === selected.id} onSelect={() => openInvoice(i.id)} />
@@ -409,9 +537,9 @@ export function Inbox({
           })}
           {done.length > 0 && (
             <section>
-              <h2 className="flex items-center justify-between px-4 pt-4 pb-1 text-xs font-semibold text-muted">
-                Done ({done.length})
-                <button onClick={reset} className="font-normal underline">
+              <h2 className="flex items-center justify-between border-b border-rule/60 px-4 pt-3.5 pb-1.5 text-xs font-semibold text-muted">
+                <span>Done ({done.length})</span>
+                <button onClick={reset} className="font-normal text-ink underline">
                   Start over
                 </button>
               </h2>
@@ -428,20 +556,58 @@ export function Inbox({
           )}
         </nav>
 
-        <section aria-label="Invoice document" className="order-3 min-w-0 bg-desk p-4 sm:p-6 lg:order-none">
-          {previewUrl ? (
-            <iframe src={previewUrl} title={selected.fileName} className="h-[80vh] w-full bg-white" />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={`/samples/${selected.id}.png`}
-              alt={`Sample invoice from ${selected.fields.supplierName ?? "a supplier"}`}
-              className="mx-auto w-full max-w-[640px] bg-white shadow-sm"
-            />
-          )}
+        <section aria-label="Invoice document" className="order-3 min-w-0 bg-desk p-3 sm:p-6 lg:order-none">
+          <div className="mx-auto max-w-[640px]">
+            <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2 rounded border border-rule bg-sheet px-3 py-2 text-xs">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="figures truncate font-medium text-ink">{selected.fileName}</span>
+                {selected.title && (
+                  <span className="rounded bg-desk px-1.5 py-0.5 text-[11px] text-muted">{selected.title}</span>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                <span
+                  className={`rounded border px-1.5 py-0.5 font-medium ${
+                    selected.reads.text === "ok"
+                      ? "border-ready/30 bg-ready-soft text-ready"
+                      : "border-review/30 bg-review-soft text-review"
+                  }`}
+                >
+                  Code reader: {selected.reads.text === "ok" ? "✓ Read" : "Scan (no text)"}
+                </span>
+                <span
+                  className={`rounded border px-1.5 py-0.5 font-medium ${
+                    selected.reads.ai === "ok"
+                      ? "border-ready/30 bg-ready-soft text-ready"
+                      : "border-review/30 bg-review-soft text-review"
+                  }`}
+                >
+                  AI reader: {selected.reads.ai === "ok" ? "✓ Read" : "Unavailable"}
+                </span>
+              </div>
+            </div>
+            {previewUrl ? (
+              <iframe
+                src={previewUrl}
+                title={selected.fileName}
+                className="h-[80vh] w-full rounded-sm border border-rule bg-white shadow-sm"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={`/samples/${selected.id}.png`}
+                alt={`Sample invoice from ${selected.fields.supplierName ?? "a supplier"}`}
+                className="w-full rounded-sm border border-rule bg-white shadow-sm"
+              />
+            )}
+          </div>
         </section>
 
-        <aside ref={decisionPanel} aria-label="Decision" className="min-w-0 scroll-mt-2 border-l-0 border-rule bg-sheet lg:border-l">
+        <aside
+          ref={decisionPanel}
+          aria-label="Decision"
+          className="min-w-0 scroll-mt-2 border-l-0 border-rule bg-sheet lg:border-l"
+        >
           <div className={`border-b p-4 sm:p-5 ${CARD[decision.route]}`}>
             {outcome ? (
               <>
@@ -451,24 +617,24 @@ export function Inbox({
                     ? `Settled as "${outcome.personChoice}". Included in your CSV export.`
                     : `Settled as "${outcome.personChoice}". This invoice will not be posted.`}
                 </p>
-                <p className="mt-2 text-xs text-muted">
-                  <span className="font-medium text-ink/80">Route reason:</span> {outcome.routeReason}
-                </p>
+                <div className="mt-2.5 rounded border border-ink/10 bg-sheet/80 px-2.5 py-1.5 text-xs text-muted">
+                  <span className="font-semibold text-ink/85">Route reason:</span> {outcome.routeReason}
+                </div>
               </>
             ) : (
               <>
-                <p className="text-base font-semibold">{decision.headline}</p>
-                {decision.question && <p className="mt-1.5 text-sm leading-relaxed">{decision.question}</p>}
-                <p className="mt-2 text-xs text-muted">
-                  <span className="font-medium text-ink/80">Route reason:</span> {getRouteReason(selected)}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <p className="text-base font-semibold text-ink">{decision.headline}</p>
+                {decision.question && <p className="mt-1.5 text-sm leading-relaxed text-ink/90">{decision.question}</p>}
+                <div className="mt-2.5 rounded border border-ink/10 bg-sheet/80 px-2.5 py-1.5 text-xs text-muted">
+                  <span className="font-semibold text-ink/85">Route reason:</span> {getCompactRouteTrace(selected)}
+                </div>
+                <div className="mt-3.5 flex flex-wrap gap-2">
                   {decision.options.map((option, index) => (
                     <button
                       key={option.label}
                       onClick={() => settle(selected, option)}
-                      className={`rounded px-3 py-1.5 text-sm ${
-                        index === 0 ? "bg-ink text-sheet" : "border border-ink/25 hover:bg-sheet/70"
+                      className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+                        index === 0 ? "bg-ink text-sheet hover:bg-ink/90" : "border border-ink/25 bg-sheet/50 hover:bg-sheet"
                       }`}
                     >
                       {option.label}
@@ -480,28 +646,79 @@ export function Inbox({
           </div>
 
           <div className="p-4 sm:p-5">
-            <h3 className="text-xs font-semibold text-muted">What was read</h3>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-xs font-semibold tracking-wide text-muted uppercase">
+                What was read (Code vs. AI)
+              </h3>
+              <span className="text-[11px] text-muted">Nothing clears on 1 read</span>
+            </div>
             <dl className="mt-2">
               {selected.views.map((v) => {
                 const a = AGREEMENT[v.agreement];
-                const value = fields[v.field] === v.value ? fieldText(v, fields.currency) : fieldText({ ...v, value: fields[v.field] }, fields.currency);
+                const value =
+                  fields[v.field] === v.value
+                    ? fieldText(v, fields.currency)
+                    : fieldText({ ...v, value: fields[v.field] }, fields.currency);
+                const mappedCheckId = FIELD_CHECK_MAP[v.field];
+                const fieldFailedCheck = mappedCheckId
+                  ? selected.checks.find((c) => c.id === mappedCheckId && c.status === "fail")
+                  : undefined;
+                const singleSourceLabel =
+                  v.agreement === "single"
+                    ? v.textValue !== null
+                      ? "Code only"
+                      : "AI only"
+                    : a.shortLabel;
+
                 return (
-                  <div key={v.field} className="grid grid-cols-[110px_minmax(0,1fr)_22px] items-baseline gap-2 border-b border-rule/70 py-1.5 text-sm">
-                    <dt className="text-xs text-muted">{FIELD_LABELS[v.field]}</dt>
-                    <dd className={`min-w-0 break-words ${typeof v.value === "number" || v.field === "iban" || v.field === "supplierTrn" ? "figures text-[13px]" : ""}`}>
-                      {value}
+                  <div
+                    key={v.field}
+                    className={`grid grid-cols-[104px_minmax(0,1fr)_auto] items-baseline gap-2 border-b border-rule/70 py-1.5 text-sm ${
+                      fieldFailedCheck
+                        ? " -mx-2 rounded bg-review-soft/55 px-2"
+                        : v.agreement === "conflict"
+                          ? " -mx-2 rounded bg-review-soft/40 px-2"
+                          : ""
+                    }`}
+                  >
+                    <dt className="truncate text-xs text-muted">{FIELD_LABELS[v.field]}</dt>
+                    <dd
+                      className={`min-w-0 break-words ${
+                        typeof v.value === "number" || v.field === "iban" || v.field === "supplierTrn"
+                          ? "figures text-[13px]"
+                          : ""
+                      } ${fieldFailedCheck ? "font-semibold text-ink" : ""}`}
+                    >
+                      <span>{value}</span>
+                      {v.agreement === "conflict" && (
+                        <span className="figures mt-0.5 block text-[11px] text-review">
+                          Code: {rawValueText(v.textValue, v.field, fields.currency)} · AI:{" "}
+                          {rawValueText(v.aiValue, v.field, fields.currency)}
+                        </span>
+                      )}
+                      {fieldFailedCheck && (
+                        <span className="mt-0.5 block text-[11px] font-medium text-blocked">
+                          ✕ Check failed: {fieldFailedCheck.label.toLowerCase()}
+                        </span>
+                      )}
                     </dd>
-                    <span title={a.label} className={`figures text-right text-xs ${a.tone}`}>
+                    <span
+                      title={a.label}
+                      className={`figures inline-flex shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] ${a.pill}`}
+                    >
                       <span aria-hidden>{a.mark}</span>
-                      <span className="sr-only">{a.label}</span>
+                      <span>{singleSourceLabel}</span>
+                      <span className="sr-only"> ({a.label})</span>
                     </span>
                   </div>
                 );
               })}
             </dl>
 
-            <h3 className="mt-6 text-xs font-semibold text-muted">Checks</h3>
-            <ul className="mt-1">
+            <h3 className="mt-6 text-xs font-semibold tracking-wide text-muted uppercase">
+              Deterministic checks (9 rules)
+            </h3>
+            <ul className="mt-1.5 space-y-0.5">
               {selected.checks.map((c) => (
                 <CheckRow key={c.id} check={c} />
               ))}
