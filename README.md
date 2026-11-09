@@ -2,7 +2,9 @@
 
 Invoice Inbox is a demo for small accounting firms that reads each PDF invoice twice — once with plain code and once with AI — and checks the extracted fields with deterministic rules. AI never decides what gets posted; only invoices where both reads agree and every check passes clear automatically, while anything unclear goes to a person with one specific question.
 
-Live demo: https://invoice-inbox.anilpervaiz.com (this is my own demo built on generated invoices; every company, TRN, and IBAN is made up).
+Live demo: https://invoice-inbox-demo.vercel.app (this is my own demo built on generated invoices; every company, TRN, and IBAN is made up).
+
+The live site shows saved results from a real AI run. Uploading your own PDF is switched off there for now. To try your own files, run it locally (see "How to run it").
 
 ![Invoice Inbox workstation showing the invoice queue, document viewer, and dual-read verification panel](docs/screenshot.png)
 
@@ -12,7 +14,7 @@ Every invoice goes through three steps before it reaches a person or the export 
 
 1. **Two independent reads.**
    - **Plain-code reader (`lib/text-reader.ts`):** Extracts text layers from the PDF with `unpdf` and parses supplier details, dates, currency, line items, VAT, total, and IBAN using regular expressions. Scanned image PDFs have no text layer, so the plain-code reader returns `empty`.
-   - **AI reader (`lib/ai-reader.ts`):** Sends the PDF bytes to Google Gemini (`gemini-3.5-flash-lite` by default, configurable via `GEMINI_MODEL`) using a strict Zod schema.
+   - **AI reader (`lib/ai-reader.ts`):** Sends the PDF bytes to Google Gemini using a strict Zod schema. The measured results below used `gemini-3.5-flash-lite`, which `.env.example` sets through `GEMINI_MODEL`. Without that setting the code falls back to `gemini-3.8-flash`, which hasn't been measured.
 2. **Field-by-field comparison (`lib/decide.ts`).**
    - Each of the 11 scalar fields is marked as `agreed` (both readers found the same normalised value), `conflict` (the two readers found different values), `single` (only one reader found a value), or `missing` (neither found it).
 3. **Nine deterministic checks (`lib/rules.ts`).**
@@ -28,7 +30,7 @@ See [docs/how-it-decides.md](docs/how-it-decides.md) for the full pipeline diagr
 
 ## Measured results
 
-Evaluated on **2026-11-06** with **`gemini-3.5-flash-lite`** via `npm run eval` (`data/eval-report.json`). Core extraction and decision files (`lib/text-reader.ts`, `lib/ai-reader.ts`, `lib/rules.ts`, `lib/decide.ts`) were frozen at commit `2395671` before the held-out set was generated.
+Evaluated on **2026-11-06** with **`gemini-3.5-flash-lite`** via `npm run eval` (`data/eval-report.json`). Core extraction and decision files (`lib/text-reader.ts`, `lib/ai-reader.ts`, `lib/rules.ts`, `lib/decide.ts`) were frozen at commit `2395671` before the held-out set was generated. The held-out set was regenerated once on 2026-11-06, after a first plain-code-only run (`2866892`), to fix broken multi-page and Arabic PDFs and add 3 invoices. The reader and rule code didn't change, and the AI reader only ever saw the final set.
 
 | Metric | Known set (40 generated invoices, 5 layouts) | Held-out set (48 generated invoices, 5 unseen layouts) | Combined (88 invoices) |
 |---|---|---|---|
@@ -38,11 +40,11 @@ Evaluated on **2026-11-06** with **`gemini-3.5-flash-lite`** via `npm run eval` 
 | **Missing fields respected (not guessed)** | N/A | 11 of 11 missing fields left `null` by both readers (0 guessed) | 11 of 11 (100%) |
 | **Planted errors caught by checks** | 14 of 14 caught | 10 of 10 caught | 24 of 24 caught (100%) |
 | **Clean invoices cleared automatically** | 21 of 22 cleared (1 sent to review on lookalike date/amount check) | 20 of 32 cleared (12 sent to review where plain-code reader missed unseen layout labels) | 41 of 54 cleared |
-| **Prompt-injection / hidden-instruction tests** | 1 sample (`OG-5582`) routed to `Needs you` | 4 held-out tests: 0 false clears (all 4 routed to `Needs you`) | 0 false clears |
+| **Prompt-injection / hidden-instruction tests** | 1 sample (`OG-5582`) routed to `Needs you` | 4 held-out tests, 0 false clears. The AI followed one visible note and read the total as 120.00 instead of 1,260.00; the total check failed and it went to `Needs you`. The other 3 went where their real content sent them: 1 `Needs you` (wrong total), 1 `Blocked` (changed IBAN), 1 `Ready` (clean; the white-text instruction was ignored) | 0 false clears |
 
-Total AI evaluation cost across all 88 invoices was **$0.0352 USD**.
+Estimated AI cost for the 88 reads: **$0.0352 USD**, worked out as 88 reads at an assumed $0.0004 each. It isn't a billed amount.
 
-**Method:** The known set (`eval/invoices/`) has 40 generated invoices across the 5 layouts the plain-code reader was written alongside. The held-out set (`eval/holdout/invoices/`) has 48 generated invoices across 5 new layouts (`two-column`, `bilingual-arabic`, `multi-page`, `discount-table`, and `compact-memo`) covering English/Arabic labels, two-page tables, thousands separators, discounts, `DD.MM.YYYY` and `MM/DD/YYYY` date traps, zero-VAT foreign bills, missing fields, skewed scans, planted arithmetic/IBAN/duplicate errors, and visible/invisible prompt-injection instructions. Ground truth (`eval/holdout/truth.json`) is written directly from the invoice generator specs, never from a reader's output.
+**Method:** The known set (`eval/invoices/`) has 40 generated invoices across the 5 layouts the plain-code reader was written alongside. The held-out set (`eval/holdout/invoices/`) has 48 generated invoices across 5 new layouts (`modern-grid`, `compact-slip`, `corporate-split`, `tabular-border`, and `bilingual-uae`) covering English/Arabic labels, two-page tables, thousands separators, discounts, five date styles (`DD/MM/YYYY`, `DD-MM-YYYY`, `DD.MM.YYYY`, `D Mon YYYY` and `YYYY/MM/DD`), zero-VAT foreign bills, missing fields, skewed scans, planted arithmetic/IBAN/duplicate errors, and visible/invisible prompt-injection instructions. Ground truth (`eval/holdout/truth.json`) is written directly from the invoice generator specs, never from a reader's output.
 
 ## Limits
 
@@ -70,7 +72,7 @@ To enable live AI reads for uploaded PDFs, set `GOOGLE_GENERATIVE_AI_API_KEY` an
 | Command | What it does |
 |---|---|
 | `npm run dev` | Starts the local Next.js development server on port 3000 |
-| `npm test` | Runs all 71 unit and integration tests with Vitest |
+| `npm test` | Runs all 76 unit and integration tests with Vitest |
 | `npx tsc --noEmit` | Runs the TypeScript compiler check |
 | `npm run lint` | Runs ESLint across the codebase |
 | `npm run build` | Builds the production Next.js bundle |
@@ -84,7 +86,7 @@ To enable live AI reads for uploaded PDFs, set `GOOGLE_GENERATIVE_AI_API_KEY` an
 
 - **Swap suppliers, TRNs, IBANs, and posted history:** Edit `SUPPLIERS` and `POSTED` in `lib/demo-data.ts`.
 - **Change VAT rates or currency rules:** Update `RULE_CONTEXT.domesticVatRates` in `lib/demo-data.ts` and `checkVatRate` / `checkTrn` in `lib/rules.ts`.
-- **Change the AI model:** Set `GEMINI_MODEL` in `.env.local` (defaults to `gemini-3.8-flash` in code or `gemini-3.5-flash-lite` via `.env.local`).
+- **Change the AI model:** Set `GEMINI_MODEL` in `.env.local`. `.env.example` sets `gemini-3.5-flash-lite`, the measured model. If you change it, re-run `npm run eval -- --fresh`, because the saved reads in `data/ai-cache/` don't record which model made them.
 - **Customise Xero or QuickBooks account codes:** Edit `toXeroCsv` and `toQuickBooksCsv` in `lib/csv.ts`.
 
 See [docs/adapt-it.md](docs/adapt-it.md) for step-by-step code examples.
