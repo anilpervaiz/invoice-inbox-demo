@@ -2,6 +2,12 @@
   "name": "invoice-inbox-demo",
   "version": "0.1.0",
   "private": true,
+  "description": "A demo for small accounting firms that reads each invoice twice (plain code and AI), checks the result with plain rules, and routes anything unclear to a person.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anilpervaiz/invoice-inbox-demo.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
